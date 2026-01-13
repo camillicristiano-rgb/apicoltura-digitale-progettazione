@@ -43,7 +43,7 @@
 
 ![Alt Text](https://ae01.alicdn.com/kf/H6ae6caf067f64ea4915338c69baa4defr/ESP32-CAM-WiFi-Bluetooth-Module-Camera-Module-Development-Board-ESP32-with-Camera-Module-OV2640-2MP-For.jpg_640x640.jpg)
 
-# SHT21 - HTU21
+# SHT21 - HTU21 - RF-HW-02
 
 - VIN (Tensione di ingresso)
 - GND (Massa)
@@ -72,7 +72,7 @@
 
 ![Alt Text](https://www.arduiner.com/wp-content/uploads/2014/06/3788-SHT21-Umidita-and-Temp-Sensore.jpg)
 
-# DS18B20
+# DS18B20 - RF-HW-03
 
 - **Dati (Data)**
 - **VCC (+)**
@@ -99,7 +99,7 @@
 
 ![Alt Text](https://ampul.eu/18307-medium_default/sonda-di-temperatura-ds18b20-10k-3m.jpg)
 
-# INMP441
+# INMP441 - RF-HW-03
 
 ## SPECIFICHE
 
@@ -137,7 +137,7 @@ Note Hardware: La linea SD dovrebbe avere una resistenza di pulldown da 100 k\$\
 
 ![Alt Text](https://plexylab.com/web/image/product.image/1571/image_1024/inmp441-sensor-microfono-interfaz-i2s-mems-bajo-consumo-002)
 
-# HW-038
+# HW-038 - RF-HW-05
 
 - D5 Pin (Signal): Pin di segnale (uscita analogica).
 - VCC (+5V): Polo positivo dell'alimentazione.
@@ -157,7 +157,7 @@ Note Hardware: La linea SD dovrebbe avere una resistenza di pulldown da 100 k\$\
 
 ![Alt Text](https://m.media-amazon.com/images/I/41ZlUsZMClL.jpg)
 
-# HX711 (~40kg)
+# HX711 (~40kg) - RF-HW-01
 
 - Pin 1 (VSUP): Ingresso alimentazione regolatore (2,7 ~ 5,5V).
 - Pin 2 (BASE): Uscita controllo regolatore (non collegato se non usato).
