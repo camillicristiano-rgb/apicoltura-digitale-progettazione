@@ -183,14 +183,43 @@ Perché è meglio? Perché ora sappiamo **quanto spesso**, **dove finisce il dat
 ## Gruppo D — Architettura di rete e infrastruttura (server, sicurezza, connettività)
 > Obiettivo: definire come “parlano” tra loro device, server e interfaccia web (e con quali garanzie).
 
-### Requisiti funzionali (esempi)
-- **RF-NET-01 — Connettività device**: Il device deve potersi connettere alla rete dell’apiario (Wi‑Fi locale o hotspot dedicato) per raggiungere il server REST.  
 
-### Requisiti non funzionali (esempi)
-- **RNF-NET-01 — Disponibilità**: Il servizio deve essere disponibile in orario di lavoro dell’apicoltore (definire fascia e downtime massimo).  
+### Requisiti funzionali
 
-📎 Media consigliati:
-- Un semplice diagramma rete (apiario → internet → VPS/server → smartphone).
+-   **RF-NET-01 — Router dedicato all’apiario**:  
+    Deve essere utilizzato un router adeguato per ambienti esterni(67/68) e connessioni M2M/IoT (es. router STRONG o equivalente), in grado di garantire stabilità di connessione e gestione remota.
+    
+-   **RF-NET-02— Scelta del gestore di rete**:  
+    Il gestore di connettività deve essere selezionato in base alla copertura reale nella zona dell’apiario, verificata tramite test sul campo (es. test di segnale e velocità).
+    
+-   **RF-NET-03— Trasmissione dati automatica**:  
+    Il sistema deve trasmettere i dati raccolti dall’arnia al server senza intervento manuale dell’utente.
+    
+-   **RF-NET-04 — Ridotta necessità di manutenzione**:  
+    L’architettura di rete deve essere progettata per richiedere il minimo intervento di manutenzione ordinaria da parte dell’apicoltore.
+    
+
+----------
+
+### Requisiti non funzionali
+
+-   **RNF-NET-01 — Alimentazione autonoma**:  
+    Il sistema di rete (router e device) deve essere alimentato tramite batteria integrata, alloggiata in un box di plastica idrorepellente per la protezione dagli agenti atmosferici.
+    
+-   **RNF-NET-02 — Energia rinnovabile**:  
+    Deve essere previsto un pannello solare posizionato in modo strategico per massimizzare l’esposizione alla luce solare e garantire la ricarica continua della batteria.
+    
+-   **RNF-NET-03 — Continuità operativa senza rete elettrica**:  
+    In assenza di alimentazione elettrica, il router e i dispositivi devono continuare a funzionare esclusivamente tramite pannello solare e batteria.
+    
+-   **RNF-NET-04 — Efficienza energetica**:  
+    Il consumo energetico mensile dell’intero sistema deve essere minimo e compatibile con l’alimentazione solare prevista.
+    
+-   **RNF-NET-05 — Resistenza ambientale**:  
+    I componenti devono operare correttamente in presenza di variazioni di temperatura e umidità, riducendo il rischio di ossidazione e degrado dei materiali.
+    
+-   **RNF-NET-06 — Calcolo e monitoraggio dei consumi**:  
+    Deve essere effettuato un calcolo preventivo del consumo energetico complessivo del sistema per garantire l’autonomia richiesta e il corretto dimensionamento di batteria e pannello solare.
 
 ---
 
@@ -229,3 +258,4 @@ Perché è meglio? Perché ora sappiamo **quanto spesso**, **dove finisce il dat
 8. **Tracciabilità** (tabellina requisito → fonte → test → componente)
 
 Buon lavoro: i requisiti non sono “burocrazia”, sono l’unico modo per non litigare con il futuro voi stessi. 😄
+
