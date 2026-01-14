@@ -70,6 +70,7 @@
 - Tempo di risposta (\$\\tau\$ 63%): da 5 a 30 s
 - Deriva a lungo termine (Tipica): <0,02 °C/anno
 
+
 ![Alt Text](https://www.arduiner.com/wp-content/uploads/2014/06/3788-SHT21-Umidita-and-Temp-Sensore.jpg)
 
 # DS18B20
@@ -94,6 +95,16 @@
 - Lunghezza del cavo: 1 metro
 - Diametro della sonda: 6mm
 - Peso: 15g
+
+## LIBRERIE
+[milesburton/Arduino-Temperature-Control-Library v4.0.5](https://github.com/milesburton/Arduino-Temperature-Control-Library)
+[OneWire v2.3.8](https://www.pjrc.com/teensy/td_libs_OneWire.html)
+
+## CODICE
+[Cliccare qui]()
+
+## SCHEMA ELETTRICO
+![Alt Text](https://www.electronicwings.com/storage/PlatformSection/TopicContent/422/description/DS18B20%20Interfacing%20Diagram%20with%20ESP32.png)
 
 ![Alt Text](https://lastminuteengineers.com/wp-content/uploads/arduino/Wiring-Waterproof-DS18B20-Temperature-Sensor-to-Arduino.png)
 
