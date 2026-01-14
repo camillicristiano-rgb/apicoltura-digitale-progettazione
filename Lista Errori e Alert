@@ -1,0 +1,61 @@
+**Elenco Ordinato delle Operazioni del Sistema:**
+
+### **1.0 Ciclo di Misurazione e Acquisizione (start)**
+
+- **1.1 Acquisizione Dati: Lettura del valore della temperatura (float, °C) e generazione del Timestamp (RF-SW-01, RF-SW-02).**
+- **1.2 Verifica Integrità Dato: Controllo se il dato è nullo.**
+- **1.3 Verifica Range Sensore: Controllo se il dato è fuori range.**
+- **1.4 Verifica Integrità Sensore: Controllo se il sensore è offline.**
+- **1.5 Salvataggio su Memoria Locale: Se il dato è valido, memorizzazione permanente su ESP32 (RNF-SW-01).**
+- **1.6 Verifica Connettività Database: Controllo della disponibilità della rete e del DB (RNF-SW-01).**
+- **1.7 Sincronizzazione Cloud/DB: Se la connessione è presente, upload del valore e del timestamp (RF-SW-03, RF-SW-04).**
+- **1.8 Controllo Soglia Massima: Verifica se la temperatura è maggiore della SogliaMax (RF-SW-05).**
+- **1.9 Alert Superamento Massimo: Invio notifica di allerta per temperatura critica elevata.**
+- **1.10 Controllo Soglia Minima: Verifica se la temperatura è inferiore alla SogliaMin (RF-SW-06).**
+- **1.11 Alert Superamento Minimo: Invio notifica di allerta per temperatura critica bassa.**
+- **1.12 Intervallo di Campionamento: Attesa controllata di 6 minuti (RF-SW-07).**
+- **1.13 Tentativo di Ripristino Dati: Se la connessione torna disponibile, tentativo di upload dei dati locali accumulati (RNF-SW-01).**
+- **1.14 Chiusura Loop: Rinvio dell'esecuzione all'inizio del ciclo di misurazione.**
+
+
+### **3.0 Ciclo di Misurazione e Acquisizione Umidità**
+ - **3.1 impossibile rilevare il sensore dell'umidità**
+ - **3.2 impossibile ottenere informazioni sull'umidità**
+ - **3.3 Il dato non può essere null**
+ - **3.4 Il dato non può essere negativo**
+ - **3.5 Il dato deve essere gestito con una variabile float**
+ - **3.6 Esp32 offline**
+ - **3.7 Umidità troppo alta**
+ - **3.8 Umidità troppo bassa**
+
+## Errori – Sensore di Peso (PS)
+### ERR-PS-2.01 — Lettura ADC non pronta
+**Descrizione errore:** Il codice tenta di leggere il valore a 24 bit quando l’ADC non ha ancora un campione valido (“data not ready”), ottenendo un dato non attendibile.
+### ERR-PS-2.02 — Timeout acquisizione
+**Descrizione errore:** Entro un tempo massimo il campione non viene acquisito (ADC non risponde o campione non arriva) e la misura viene persa.
+### ERR-PS-2.03 — Saturazione ADC
+**Descrizione errore:** Il valore letto rimane fisso al minimo o al massimo (es. sempre 0 oppure full-scale), indicando una misura non valida da scartare.
+### ERR-PS-2.04 — Valore instabile (rumore alto)
+**Descrizione errore:** Durante la finestra di misura i campioni oscillano oltre una soglia di stabilità, rendendo il valore non affidabile.
+### ERR-PS-2.05 — Outlier improvviso
+**Descrizione errore:** Uno o pochi campioni risultano molto distanti dagli altri (picchi), quindi devono essere ignorati o filtrati.
+### ERR-PS-2.06 — Taratura non presente
+**Descrizione errore:** Mancano i parametri necessari (offset o coefficiente) per convertire il dato grezzo in kg.
+### ERR-PS-2.07 — Taratura non valida
+**Descrizione errore:** I parametri di taratura risultano incoerenti o fuori range plausibile, rendendo la conversione in kg non affidabile.
+### ERR-PS-2.08 — Errore conversione in kg
+**Descrizione errore:** La trasformazione da valore grezzo a kg produce un valore non valido (NaN, infinito) o fuori scala.
+### ERR-PS-2.09 — Peso fuori range min/max
+**Descrizione errore:** Il peso calcolato in kg è inferiore al minimo o superiore al massimo configurato e la misura viene scartata.
+### ERR-PS-2.10 — Peso negativo
+**Descrizione errore:** Dopo tara o taratura il peso risulta negativo oltre la tolleranza prevista, indicando una misura non valida.
+### ERR-PS-2.11 — Prima misura non stabile dopo wake-up
+**Descrizione errore:** Le prime letture dopo avvio o risveglio dal deep sleep risultano instabili e devono essere scartate.
+### ERR-PS-2.12 — Timestamp mancante
+**Descrizione errore:** Alla misura non viene associata data e ora, rendendo il dato non correttamente tracciabile.
+### ERR-PS-2.13 — Timestamp non valido
+**Descrizione errore:** Data o ora associate alla misura non sono plausibili (es. valori di default), causando incoerenza nello storico.
+### ERR-PS-2.14 — Invio fallito
+**Descrizione errore:** Il sistema non riesce a inviare o salvare la misura sul server e deve gestire un retry o salvataggio locale.
+### ERR-PS-2.15 — Duplicazione misura
+**Descrizione errore:** La stessa misura viene inviata più volte generando duplicazioni, per assenza di controllo di unicità.
