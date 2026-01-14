@@ -1,5 +1,6 @@
 
 
+
 # 🧭 Guida rapida: come si scrivono i requisiti (progetto “Apicoltura Digitale”)
 
 > **Obiettivo:** trasformare idee, appunti e desideri del cliente in frasi **chiare, verificabili e tracciabili** (cioè: controllabili con un test e collegabili alla loro “fonte”).  
@@ -132,7 +133,13 @@ Perché è meglio? Perché ora sappiamo **quanto spesso**, **dove finisce il dat
 -- Entrata (bmp)
 -- Livello acqua (%)
 - **RF-DB-04 — Filtri e Statistiche**: Aggiungere filtri e statistiche varie.
-- **RF-DB-05 — Apiari**: Gestire più apiari.
+- **RF-DB-05 — Apiari**: Il database deve supportare la gestione di più apiari, intesi come insiemi di arnie e colonie di api, che saranno amministrabili tramite l’applicazione.
+Ogni apiario deve essere identificato univocamente da un ID e deve contenere le seguenti informazioni:
+--Nome della località in cui è situato
+--Coordinate geografiche (latitudine e longitudine)
+L’applicazione deve consentire la creazione, visualizzazione e gestione degli apiari presenti nel database.
+Per ciascun apiario deve essere possibile aggiungere, gestire e associare più arnie.
+Il sistema deve inoltre permettere l’inserimento di nuovi apiari in qualsiasi momento.
 - **RF-DB-06 — Arnie**:  Collegare più arnie ad un apiario.
 
 ### Requisiti non funzionali
