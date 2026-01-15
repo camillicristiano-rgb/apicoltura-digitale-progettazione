@@ -1,4 +1,5 @@
 
+
 # 🧭 Guida rapida: come si scrivono i requisiti (progetto “Apicoltura Digitale”)
 
 > **Obiettivo:** trasformare idee, appunti e desideri del cliente in frasi **chiare, verificabili e tracciabili** (cioè: controllabili con un test e collegabili alla loro “fonte”).
@@ -128,15 +129,28 @@ Perché è meglio? Perché ora sappiamo **quanto spesso**, **dove finisce il dat
 > Obiettivo: strutturare i dati in modo che siano consultabili, confrontabili e “puliti”.
 
 ### Requisiti funzionali
-- **RF-DB-01 — Anagrafiche**: Il database deve gestire le entità: `Apiario`, `Arnia`, `Sensore`, `Notifica`, `Rilevazione`, `Utente`.  
-- **RF-DB-02 — Tipo utente**: Devono esistere diversi tipi di utente: `Admin`, `Apicoltore`.
+- **RF-DB-01 — Anagrafiche**:
+Il database deve gestire le seguenti entità: `Apiario`, `Arnia`, `Sensore`, `Rilevazione`, `Notifica` e `Utente`.
+L’entità `Apiario` è collegata ad `Arnia` e rappresenta un insieme di arnie. Essa è caratterizzata dagli attributi id, nome, posizione e luogo. La posizione indica le coordinate geografiche, mentre il luogo è una stringa che rappresenta il nome del posto associato alle coordinate inserite.
+L’entità `Arnia` è collegata sia ad `Apiario` sia a `Sensore` e contiene gli attributi id, data di installazione e piena.
+L’entità `Sensore` è collegata sia ad`Arnia` sia a `Rilevazione` e presenta gli attributi id, stato (attivo o spento) e tipo, che serve a identificare l’unità di misura da associare al dato rilevato.
+L’entità `Rilevazione` è collegata sia a `Sensore` sia a `Notifica` e include come attributi id, dato, data e ora.
+Infine, l’entità `Notifica` è collegata a `Rilevazione` e possiede gli attributi id, titolo e descrizione.
+
+- **RF-DB-02 — Tipo utente**: Devono esistere diversi tipi di utente: `Admin`, `Apicoltore`. L' `Admin` ha il compito di gestire il software, lui a differenza dell'apicoltore può gestire gli utenti che hanno fatto l'accesso all'interno del software, esso può leggere le informazioni nella tabella delle entità: `Apiari`, `Arnie`, `Sensori`, `Rilevazioni` e `Notifiche`. Invece può scrivere all'interno delle entità: `Apiari`, `Arnie` e `Sensori` ma con l'eccezione che sui sensori può solo modificare le soglie. L'`Apicoltore` può accedere al software e visualizzare i dati che servono per controllare le arnie, lui può leggere leggere le informazioni nella tabella delle entità: `Apiari`, `Arnie`, `Sensori`, `Rilevazioni` e `Notifiche`. Invece esso può scrivere all'interno delle entità: `Apiari`, `Arnie` e `Sensori` ma con l'eccezione che sui sensori può solo modificare le soglie. 
 - **RF-DB-03 — Dati del database**: Il database deve ricevere i dati:
--- Rumore (dB)
+-- Rumore (dB) 
+Misura il livello di rumore all’interno o vicino all'arnia. Serve a individuare attività anomale, presenza di predatori, sciami o stress della colonia.
 -- Peso (kg)
+Indica il peso complessivo dell’arnia. È un indicatore dello stato di produzione (miele, cera, covata) o di eventuale perdita di api.
 -- Temperatura (°C)
+Misura la temperatura interna dell’arnia. Valori anomali possono segnalare problemi nella ventilazione o malattie nella colonia.
 -- Umidità (%)
+Indica il livello di umidità interna. È cruciale per la conservazione del miele e il benessere delle api.
 -- Entrata (bmp)
+Misura il passaggio di api all’ingresso dell’arnia (contatore ottico o vibrazionale). Permette di valutare l’attività della colonia e il traffico giornaliero.
 -- Livello acqua (%)
+Indica la quantità d’acqua presente nel serbatoio utilizzato per il raffreddamento o l’alimentazione. Serve a garantire adeguata idratazione e a pianificare ricariche.
 - **RF-DB-04 — Filtri e Statistiche**: Aggiungere filtri e statistiche varie.
 - **RF-DB-05 — Apiari**: Gestire più apiari.
 - **RF-DB-06 — Arnie**:  Collegare più arnie ad un apiario.
@@ -202,10 +216,6 @@ Perché è meglio? Perché ora sappiamo **quanto spesso**, **dove finisce il dat
     
 3.  Predatori: Si possono notare calabroni o vespe che attaccano la colonia.
     
-
-
-**[RF-HW-05 — Livello Risorse Idriche](DOCUMENTAZIONE%20HARDWARE.md#hw-038-rf-hw-05)** Il device deve misurare la distanza del pelo libero dell'acqua in un serbatoio esterno (secchio) e convertire il dato in percentuale residua.
-
   
 
 ----------
@@ -315,48 +325,62 @@ Perché è meglio? Perché ora sappiamo **quanto spesso**, **dove finisce il dat
 
 ### Requisiti funzionali
 
--   **RF-NET-01 — Router dedicato all’apiario**:  
-    Deve essere utilizzato un router adeguato per ambienti esterni(67/68) e connessioni M2M/IoT (es. router STRONG o equivalente), in grado di garantire stabilità di connessione e gestione remota.
+**RF-NET-01 — Router dedicato all’apiario:**  
+Deve essere utilizzato un router adeguato lte con sim all'interno di in una scatola(IP67/IP68), in grado di garantire stabilità di connessione.
+
+**RF-NET-02 — Scelta del gestore di rete:**  
+Il gestore di connettività deve essere selezionato in base alla copertura reale nella zona dell’apiario, verificata tramite test sul campo (es. test di segnale e velocità). Il router deve poter assegnare indirizzi IP ai dispositivi tramite DHCP o permettere IP statici opzionali.
+
+**RF-NET-03 — Trasmissione dati automatica:**  
+Il sistema deve trasmettere i dati raccolti dall’arnia al server senza intervento manuale dell’utente.
+
+-  I dispositivi collocati nell’arnia ricevono un IP locale dal router.
     
--   **RF-NET-02— Scelta del gestore di rete**:  
-    Il gestore di connettività deve essere selezionato in base alla copertura reale nella zona dell’apiario, verificata tramite test sul campo (es. test di segnale e velocità).
+-  Il router funge da gateway per comunicare con lo smartphone e il server.
     
--   **RF-NET-03— Trasmissione dati automatica**:  
-    Il sistema deve trasmettere i dati raccolti dall’arnia al server senza intervento manuale dell’utente.
+-  La comunicazione deve garantire la consegna dei dati in tempo reale e la possibilità di controllo remoto dell’arnia tramite smartphone o interfaccia web.
     
--   **RF-NET-04 — Ridotta necessità di manutenzione**:  
-    L’architettura di rete deve essere progettata per richiedere il minimo intervento di manutenzione ordinaria da parte dell’apicoltore.
-    
+
+**RF-NET-04 — Ridotta necessità di manutenzione:**  
+L’architettura di rete deve richiedere il minimo intervento di manutenzione ordinaria da parte dell’apicoltore.
+
+**RF-NET-05 — Ridondanza della comunicazione:**  
+Il sistema deve garantire la trasmissione dei dati anche in caso di interruzione temporanea della connessione principale, tramite memorizzazione locale dei dati, assicurando la continuità del servizio.
+
+**RF-NET-06 — Controllo priorità dei dati:**  
+Il sistema deve gestire la priorità dei dati trasmessi, dando precedenza ai dati critici (es. allarmi di temperatura o umidità dell’arnia) rispetto ai dati di monitoraggio ordinari, garantendo che le informazioni più importanti arrivino tempestivamente anche in condizioni di rete limitata.
 
 ----------
 
 ### Requisiti non funzionali
 
--   **RNF-NET-01 — Alimentazione autonoma**:  
-    Il sistema di rete (router e device) deve essere alimentato tramite batteria integrata, alloggiata in un box di plastica idrorepellente per la protezione dagli agenti atmosferici.
-    
--   **RNF-NET-02 — Energia rinnovabile**:  
-    Deve essere previsto un pannello solare posizionato in modo strategico per massimizzare l’esposizione alla luce solare e garantire la ricarica continua della batteria.
-    
--   **RNF-NET-03 — Continuità operativa senza rete elettrica**:  
-    In assenza di alimentazione elettrica, il router e i dispositivi devono continuare a funzionare esclusivamente tramite pannello solare e batteria.
-    
--   **RNF-NET-04 — Efficienza energetica**:  
-    Il consumo energetico mensile dell’intero sistema deve essere minimo e compatibile con l’alimentazione solare prevista.
-    
--   **RNF-NET-05 — Resistenza ambientale**:  
-    I componenti devono operare correttamente in presenza di variazioni di temperatura e umidità, riducendo il rischio di ossidazione e degrado dei materiali.
-    
--   **RNF-NET-06 — Calcolo e monitoraggio dei consumi**:  
-    Deve essere effettuato un calcolo preventivo del consumo energetico complessivo del sistema per garantire l’autonomia richiesta e il corretto dimensionamento di batteria e pannello solare.
+**RNF-NET-01 — Alimentazione autonoma:**  
+Il sistema di rete (router e dispositivi) deve essere alimentato tramite batteria integrata, protetta da un box resistente agli agenti atmosferici.
 
----
+**RNF-NET-02 — Energia rinnovabile:**  
+Deve essere previsto un pannello solare posizionato in modo strategico per massimizzare l’esposizione alla luce solare e garantire la ricarica continua della batteria.
+
+**RNF-NET-03 — Continuità operativa senza rete elettrica:**  
+In assenza di alimentazione elettrica, il router e i dispositivi devono continuare a funzionare.
+
+**RNF-NET-04 — Efficienza energetica:**  
+Il consumo energetico mensile dell’intero sistema deve essere minimo e compatibile con l’alimentazione solare prevista.
+
+**RNF-NET-05 — Resistenza ambientale:**  
+I componenti devono operare correttamente in presenza di variazioni di temperatura e umidità, riducendo il rischio di ossidazione e degrado dei materiali.
+
+**RNF-NET-06 — Calcolo e monitoraggio dei consumi energetici:**  
+Deve essere effettuato un calcolo preventivo del consumo energetico complessivo del sistema per garantire l’autonomia richiesta e il corretto dimensionamento di batteria e pannello solare.
+
+**RNF-NET-07 — Gestione indirizzi IP e rete:**  
+Il sistema deve supportare configurazioni IP dinamiche (DHCP) e statiche per tutti i dispositivi, garantendo la comunicazione sicura e affidabile tra arnia, router, smartphone e server cloud. Deve permettere il monitoraggio remoto degli IP e dei dispositivi connessi, assicurando tracciabilità e continuità della trasmissione dati.
+
+**RNF-NET-08 — Calcolo consumo dati per scelta del gestore:**  
+Prima di selezionare l’offerta del gestore di rete, deve essere effettuato un calcolo del consumo dati previsto dal sistema per scegliere l’offerta più adatta ed evitare costi inutili.---
 
 # 8) Mini nota: cos’è un file Markdown (.md) e perché lo usiamo
-
-**Markdown** è un modo semplice per scrivere documenti usando solo testo, ma con una sintassi leggera per titoli, elenchi, grassetti e blocchi di codice.
-
-È perfetto per GitHub e per consegne “pulite” in cui versionare modifiche e lavorare in gruppo.
+**Markdown** è un modo semplice per scrivere documenti usando solo testo, ma con una sintassi leggera per titoli, elenchi, grassetti e blocchi di codice.  
+È perfetto per GitHub e per consegne “pulite” in cui versionare modifiche e lavorare in gruppo
 
 ### Mini cheat sheet Markdown
 

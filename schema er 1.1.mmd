@@ -1,0 +1,39 @@
+erDiagram
+    APIARIO {
+        int api_id 
+		string api_coordinate
+        string api_luogo
+        string api_nome
+    }
+
+    ARNIA {
+        int arn_id 
+        date arn_dataInst
+        boolean arn_piena
+    }
+
+    SENSORE {
+        int sen_id 
+        enum sen_tipo
+        boolean sen_stato
+		int sen_min
+		int sen_max
+    }
+
+    RILEVAZIONE {
+        int ril_id 
+        float ril_dato
+        date ril_data
+        time ril_ora
+    }
+
+    NOTIFICA {
+        int not_id 
+        string not_titolo
+        string not_desc
+    }
+
+    APIARIO ||--o{ ARNIA : contiene
+    ARNIA ||--o{ SENSORE : ospita
+    SENSORE ||--o{ RILEVAZIONE : genera
+    RILEVAZIONE ||--|| NOTIFICA : attiva
