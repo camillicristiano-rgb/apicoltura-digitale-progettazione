@@ -1,4 +1,5 @@
 
+
 # 🧭 Guida rapida: come si scrivono i requisiti (progetto “Apicoltura Digitale”)
 
 > **Obiettivo:** trasformare idee, appunti e desideri del cliente in frasi **chiare, verificabili e tracciabili** (cioè: controllabili con un test e collegabili alla loro “fonte”).
@@ -138,12 +139,18 @@ Infine, l’entità `Notifica` è collegata a `Rilevazione` e possiede gli attri
 
 - **RF-DB-02 — Tipo utente**: Devono esistere diversi tipi di utente: `Admin`, `Apicoltore`. L' `Admin` ha il compito di gestire il software, lui a differenza dell'apicoltore può gestire gli utenti che hanno fatto l'accesso all'interno del software, esso può leggere le informazioni nella tabella delle entità: `Apiari`, `Arnie`, `Sensori`, `Rilevazioni` e `Notifiche`. Invece può scrivere all'interno delle entità: `Apiari`, `Arnie` e `Sensori` ma con l'eccezione che sui sensori può solo modificare le soglie. L'`Apicoltore` può accedere al software e visualizzare i dati che servono per controllare le arnie, lui può leggere leggere le informazioni nella tabella delle entità: `Apiari`, `Arnie`, `Sensori`, `Rilevazioni` e `Notifiche`. Invece esso può scrivere all'interno delle entità: `Apiari`, `Arnie` e `Sensori` ma con l'eccezione che sui sensori può solo modificare le soglie. 
 - **RF-DB-03 — Dati del database**: Il database deve ricevere i dati:
--- Rumore (dB)
+-- Rumore (dB) 
+Misura il livello di rumore all’interno o vicino all'arnia. Serve a individuare attività anomale, presenza di predatori, sciami o stress della colonia.
 -- Peso (kg)
+Indica il peso complessivo dell’arnia. È un indicatore dello stato di produzione (miele, cera, covata) o di eventuale perdita di api.
 -- Temperatura (°C)
+Misura la temperatura interna dell’arnia. Valori anomali possono segnalare problemi nella ventilazione o malattie nella colonia.
 -- Umidità (%)
+Indica il livello di umidità interna. È cruciale per la conservazione del miele e il benessere delle api.
 -- Entrata (bmp)
+Misura il passaggio di api all’ingresso dell’arnia (contatore ottico o vibrazionale). Permette di valutare l’attività della colonia e il traffico giornaliero.
 -- Livello acqua (%)
+Indica la quantità d’acqua presente nel serbatoio utilizzato per il raffreddamento o l’alimentazione. Serve a garantire adeguata idratazione e a pianificare ricariche.
 - **RF-DB-04 — Filtri e Statistiche**: Aggiungere filtri e statistiche varie.
 - **RF-DB-05 — Apiari**: Gestire più apiari.
 - **RF-DB-06 — Arnie**:  Collegare più arnie ad un apiario.
