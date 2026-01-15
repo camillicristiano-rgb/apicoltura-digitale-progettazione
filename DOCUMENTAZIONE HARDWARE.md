@@ -4,7 +4,7 @@
 
 # [DS18B20](TEST%20SENSORI/Sensore_DS18B20/)  
 
-# [FLYING FISH](TEST%20SENSORI/Sensore_FlyingFish/)  
+# [FC-28](TEST%20SENSORI/Sensore_FC-28/)  
 
 # [HX711](TEST%20SENSORI/Sensore_HX711/)  
 
