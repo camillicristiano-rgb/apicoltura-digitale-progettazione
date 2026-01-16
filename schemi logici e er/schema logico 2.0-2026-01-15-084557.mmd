@@ -1,0 +1,39 @@
+erDiagram
+	direction TB
+	APIARIO {
+		int api_id PK ""  
+		varchar(50) api_luogo  "" 
+		varchar(50) api_latitudine ""
+		varchar(50) api_longitudine "" 
+		varchar(50) api_nome  ""  
+	}
+
+	ARNIA {
+		int arn_id PK ""  
+		date arn_dataInst  ""  
+		boolean arn_piena  ""  
+	    varchar(50) arn_MacAddress ""
+		int arn_api_id FK ""  
+	}
+
+	SENSORE {
+		int sen_id PK ""  
+		enum sen_tipo  ""  
+		boolean sen_stato  ""  
+		float sen_min ""
+		float sen_max ""
+		int sen_arn_id FK ""  
+	}
+
+	RILEVAZIONE {
+		int ril_id PK ""  
+		float ril_dato  ""  
+		timeStamp ril_dataOra  ""  
+		int ril_sen_id FK ""  
+	}
+
+	NOTIFICA {
+		int not_id PK ""  
+		varchar(50) not_titolo  ""    
+		varchar(50) not_desc  ""   
+	}

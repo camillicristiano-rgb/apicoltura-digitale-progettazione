@@ -1,0 +1,35 @@
+---
+config:
+  theme: redux
+  layout: fixed
+---
+flowchart TB
+    measure["Misura Temperatura<br>(float, °C, Timestamp)"] --> checkNull{"Temperatura non null/errore nel sesore?"}
+    checkNull -- No --> errorHandler>"Gestione Errore:<br>Dato null, fuori range, sensore non disponibile,<br>log e notifica errore"]
+    errorHandler --> wait["Attesa 6 minuti"]
+    checkMax{"temp > SogliaMax?"} -- Sì --> alertMax["Invia Alert Soglia Massima"]
+    checkMax -- No --> checkMin{"temp &lt; SogliaMin?"}
+    checkMin -- Sì --> alertMin["Invia Alert Soglia Minima"]
+    checkMin -- No --> wait
+    alertMax --> wait
+    alertMin --> wait
+    wait --> loop["Loop: nuova misurazione"]
+    start(["Start"]) --> n4["cont = 0"] & loop
+    n1["leggiSogliaMin"] --> n2["leggiSogliaMax"]
+    n2 --> measure
+    checkNull --> n3["cont != 5"]
+    n4 --> n1
+    n3 -- F --> start
+    n3 -- V --> n5["cont++"]
+    n5 --> checkMax
+
+    measure@{ shape: rect}
+    wait@{ shape: delay}
+    alertMax@{ shape: rect}
+    alertMin@{ shape: rect}
+    loop@{ shape: comment}
+    n4@{ shape: rect}
+    n1@{ shape: rect}
+    n2@{ shape: rect}
+    n3@{ shape: diam}
+    n5@{ shape: rect}

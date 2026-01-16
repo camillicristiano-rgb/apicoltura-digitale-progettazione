@@ -1,0 +1,474 @@
+# Analisi Dettagliata del Codice - Sistema Sensore di Peso
+
+Questo è un firmware Arduino/ESP32 per un **sistema di pesatura intelligente** con gestione completa degli errori, calibrazione, e modalità deep sleep per risparmio energetico.
+
+---
+
+## 📋 STRUTTURA GENERALE
+
+### 1. **CONFIGURAZIONI (righe 4-24)**
+
+```cpp
+// Parametri di test
+static const float TEST_peso_min_kg = 0.0f;        // Peso minimo accettabile
+static const float TEST_peso_max_kg = 40.0f;       // Peso massimo accettabile
+static const uint64_t TEST_sleep_us = 20ULL * 1000000ULL; // Deep sleep:  20 secondi
+```
+
+**Configurazioni ADC:**
+- `STABILITA_SOGLIA = 50`: Oscillazione massima accettabile tra i campioni
+- `NUM_CAMPIONI_STABILITA = 10`: Numero di letture per verificare stabilità
+- `TIMEOUT_ACQUISIZIONE_MS = 5000`: Tempo massimo per una lettura ADC
+- `NUM_CAMPIONI_MEDIA = 5`: Campioni per calcolare la media mobile
+
+**Configurazioni Calibrazione:**
+- Range offset: da -100 a +100 (compensazione zero)
+- Range coefficiente: da 0.001 a 100 (fattore di conversione ADC → kg)
+
+---
+
+## 🔴 GESTIONE ERRORI (righe 26-42)
+
+Il sistema implementa **15 codici di errore specifici**:
+
+### Errori Hardware (01-05)
+- **ERR_PS_2_01**: ADC non pronto (problema hardware)
+- **ERR_PS_2_02**: Timeout acquisizione (comunicazione fallita)
+- **ERR_PS_2_03**: Saturazione ADC (valore ai limiti fisici)
+- **ERR_PS_2_04**: Valore instabile (troppa oscillazione)
+- **ERR_PS_2_05**:  Outlier rilevato (picco anomalo)
+
+### Errori Calibrazione (06-08)
+- **ERR_PS_2_06**: Calibrazione non presente
+- **ERR_PS_2_07**: Calibrazione non valida
+- **ERR_PS_2_08**: Errore conversione ADC → kg
+
+### Errori Validazione (09-11)
+- **ERR_PS_2_09**: Peso fuori range (< 0 o > 40 kg)
+- **ERR_PS_2_10**: Peso negativo oltre tolleranza
+- **ERR_PS_2_11**: Misura instabile dopo wake-up
+
+### Errori Comunicazione (12-15)
+- **ERR_PS_2_12**: Timestamp mancante
+- **ERR_PS_2_13**: Timestamp non valido
+- **ERR_PS_2_14**: Invio fallito
+- **ERR_PS_2_15**: Duplicazione misura
+
+---
+
+## 🗂️ STRUTTURE DATI (righe 44-74)
+
+### **TaraturaData**
+```cpp
+struct TaraturaData {
+  float offset;                  // Compensazione zero
+  float coefficiente;            // Fattore di conversione
+  bool valida;                   // Stato calibrazione
+  uint32_t timestamp_taratura;   // Quando è stata fatta
+};
+```
+
+### **MisuraWeight**
+```cpp
+struct MisuraWeight {
+  float valore_kg;               // Peso misurato
+  uint64_t timestamp_ms;         // Timestamp in millisecondi
+  uint32_t timestamp_unix;       // Timestamp Unix epoch
+  bool valida;                   // Misura valida o no
+  ErrorCode ultimo_errore;       // Ultimo errore riscontrato
+  uint16_t tentativo_invio;      // Numero di tentativi di invio
+  uint32_t hash_misura;          // Hash per rilevare duplicati
+};
+```
+
+### **StatusSensore**
+Contiene lo stato globale del sistema:
+- Stato ADC e sensore (online/offline)
+- Timestamp ultimo wake-up
+- Flag prima lettura dopo risveglio
+- Dati di calibrazione
+- Ultima misura acquisita
+
+---
+
+## 🔧 FUNZIONI PRINCIPALI
+
+### **1. Verifica Hardware (righe 111-182)**
+
+#### `verificaReadinessADC()`
+```cpp
+// Attende che l'ADC sia pronto
+// In produzione leggerebbe un pin READY
+// Qui simula un'attesa di 100ms
+```
+
+#### `verificaSaturazioneADC()`
+```cpp
+// ADC a 24 bit:  range 0 - 16. 777.215
+// Se il valore è vicino ai limiti → saturazione
+// Margine di tolleranza: 100 conteggi
+```
+
+#### `verificaStabilita()`
+```cpp
+// Prende 10 campioni
+// Calcola oscillazione = max - min
+// Se oscillazione > 50 → ERRORE
+```
+
+#### `rileva_outlier()`
+```cpp
+// Calcola media e deviazione standard
+// Se un campione è oltre 3σ → outlier
+```
+
+---
+
+### **2. Calibrazione (righe 184-232)**
+
+#### `verificaTaratura()`
+Verifica che: 
+- La calibrazione esista (`valida = true`)
+- L'offset sia nel range [-100, +100]
+- Il coefficiente sia nel range [0.001, 100]
+
+#### `impostaTaratura(offset, coefficiente)`
+```cpp
+// Imposta i parametri di calibrazione
+// Valida i valori prima di salvare
+// Aggiorna timestamp calibrazione
+```
+
+#### `taraturaDifferenzaPeso()`
+```cpp
+// Procedura di calibrazione: 
+// 1. Posizionare a zero
+// 2. Azzeramento via seriale
+// 3. Peso noto per calibrazione
+// Per test: offset=0, coeff=0.001
+```
+
+---
+
+### **3. Conversione ADC → Peso (righe 269-292)**
+
+#### `conversioneInKg()`
+```cpp
+// Formula: kg = (adc_raw - offset) × coefficiente
+// 
+// Esempio con ADC = 8. 388.608 (metà scala 24bit)
+// offset = 0
+// coefficiente = 0.001
+// 
+// kg = (8.388.608 - 0) × 0.001 = 8388.608 kg
+// 
+// Controlla NaN e infinito
+```
+
+---
+
+### **4. Validazione Peso (righe 294-313)**
+
+#### `verificaRangePeso()`
+```cpp
+// Verifica:  0 kg ≤ peso ≤ 40 kg
+// Se fuori range → ALERT + ERRORE
+```
+
+#### `verificaPesoNegativo()`
+```cpp
+// Tolleranza: -0.5 kg
+// Se peso < -0.5 kg → ERRORE
+// (permette piccole fluttuazioni del zero)
+```
+
+---
+
+### **5. Timestamp (righe 315-346)**
+
+#### `generaTimestamp()`
+```cpp
+// Genera due timestamp:
+// 1. millis() - da accensione
+// 2. Unix epoch - timestamp reale
+// 
+// Validazione:  anno tra 2024-2050
+// In produzione: usa RTC o NTP
+```
+
+---
+
+### **6. Anti-Duplicazione (righe 348-379)**
+
+#### `calcolaHashMisura()`
+```cpp
+// Combina valore peso + timestamp
+// Hash = XOR(bits_float) XOR timestamp
+// Rileva misure duplicate
+```
+
+#### `verificaDuplicazione()`
+```cpp
+// Confronta hash con ultima misura
+// Se uguali → duplicazione
+```
+
+---
+
+### **7. Acquisizione Misura (righe 395-527)**
+
+#### `acquisisciMisura()` - **FUNZIONE CENTRALE**
+
+Esegue un **processo in 13 step**:
+
+```cpp
+1. ✅ Verifica stabilità post wake-up (aspetta 2 secondi)
+2. ✅ Verifica ADC pronto
+3. ✅ Verifica timeout acquisizione
+4. 📊 Leggi ADC (simulato:  8.388.608)
+5. ✅ Verifica saturazione
+6. ✅ Verifica stabilità (10 campioni)
+7. ✅ Verifica outlier (5 campioni)
+8. 🔄 Conversione ADC → kg
+9. ✅ Verifica peso negativo
+10. ✅ Verifica range (0-40 kg)
+11. 🕐 Genera timestamp
+12. #️⃣ Calcola hash e verifica duplicazione
+13. ✅ Misura valida → salva
+```
+
+**Se qualsiasi step fallisce:**
+- Imposta `ultimo_errore`
+- Ritorna codice errore
+- Log dettagliato
+
+---
+
+### **8. Salvataggio e Comunicazione (righe 529-586)**
+
+#### `salvaMemoriaLocale()`
+```cpp
+// Buffer locale:  10 misure
+// Se connessione assente → salva qui
+// Previene perdita dati offline
+```
+
+#### `sincronizzaCloudDb()`
+```cpp
+// Quando connessione disponibile: 
+// - Invia tutte le misure bufferate
+// - Svuota buffer
+// Simulato nel codice
+```
+
+#### `invioAlertPesoFuoriRange()`
+```cpp
+// Invia notifica urgente se peso fuori range
+// Gestisce retry (ERR_PS_2_14)
+```
+
+---
+
+### **9. Ciclo Principale (righe 588-624)**
+
+#### `cicloSensorePeso()`
+
+```cpp
+========== CICLO SENSORE DI PESO ==========
+
+1. 🔧 Taratura del sensore
+   └─ impostaTaratura(0. 0f, 0.001f)
+
+2. 📊 Acquisizione misura
+   └─ acquisisciMisura(&misura)
+   └─ Se errore → log + deep sleep
+
+3. 💾 Aggiorna ultima misura
+   └─ g_status.ultima_misura = misura
+
+4. ⚠️ Verifica soglie
+   └─ Se < min o > max → invio alert
+
+5. 💽 Salvataggio memoria locale
+   └─ salvaMemoriaLocale(misura)
+
+6. ☁️ Sincronizzazione cloud
+   └─ sincronizzaCloudDb(true)
+
+7. 💤 Deep Sleep (20 secondi)
+   └─ ritornoInDeepSleep()
+```
+
+---
+
+### **10. Deep Sleep (righe 626-637)**
+
+#### `ritornoInDeepSleep()`
+```cpp
+// 1. Aggiorna timestamp ultimo wake-up
+// 2. Setta flag "prima lettura"
+// 3. Configura timer:  20 secondi
+// 4. ESP32 entra in deep sleep
+// 
+// Consumo: ~10 µA (vs ~240 mA attivo)
+// Batteria 2000mAh → ~22 anni! 
+```
+
+---
+
+## 🔄 FLUSSO DI ESECUZIONE
+
+```
+BOOT ESP32
+    ↓
+setup()
+    ↓
+cicloSensorePeso()
+    ↓
+┌─────────────────────┐
+│  1.  TARATURA        │
+│  offset = 0         │
+│  coeff = 0.001      │
+└─────────────────────┘
+    ↓
+┌─────────────────���───┐
+│  2. ACQUISIZIONE    │
+│  • Verifica ADC     │
+│  • Leggi 10 campioni│
+│  • Calcola media    │
+│  • Converti in kg   │
+│  • Valida range     │
+└─────────────────────┘
+    ↓
+┌─────────────────────┐
+│  3. VALIDAZIONE     │
+│  • Range 0-40 kg?    │
+│  • Peso negativo?   │
+│  • Duplicato?       │
+└─────────────────────┘
+    ↓
+┌─────────────────────┐
+│  4. ALERT (se fuori)│
+│  • < 0 kg → ALERT   │
+│  • > 40 kg → ALERT  │
+└─────────────────────┘
+    ↓
+┌─────────────────────┐
+│  5. SALVATAGGIO     │
+│  • Buffer locale    │
+│  • Max 10 misure    │
+└─────────────────────┘
+    ↓
+┌─────────────────────┐
+│  6. SYNC CLOUD      │
+│  • Invia misure     │
+│  • Svuota buffer    │
+└─────────────────────┘
+    ↓
+┌─────────────────────┐
+│  7. DEEP SLEEP      │
+│  💤 20 secondi      │
+└─────────────────────┘
+    ↓
+WAKE UP → ripeti
+```
+
+---
+
+## 🎯 CARATTERISTICHE AVANZATE
+
+### **1. Robustezza**
+- ✅ 15 tipi di errore gestiti
+- ✅ Validazione multi-livello
+- ✅ Anti-duplicazione
+- ✅ Outlier detection (3σ)
+
+### **2. Risparmio Energetico**
+- ✅ Deep sleep tra misure
+- ✅ Wake-up temporizzato
+- ✅ Stabilizzazione post-wake
+
+### **3. Affidabilità Dati**
+- ✅ Buffer locale (offline-first)
+- ✅ Sincronizzazione automatica
+- ✅ Hash per integrità
+- ✅ Timestamp doppio
+
+### **4. Calibrazione**
+- ✅ Offset + coefficiente
+- ✅ Validazione parametri
+- ✅ Timestamp calibrazione
+- ✅ Procedura guidata
+
+---
+
+## 📊 ESEMPIO DI OUTPUT
+
+```
+=== SISTEMA SENSORE DI PESO - AVVIO ===
+
+========== CICLO SENSORE DI PESO ==========
+1. Taratura del sensore... 
+
+=== PROCEDURA DI TARATURA ===
+1. Posizionare il sensore a zero (senza peso)
+2. Inviare comando di azzeramento via seriale
+3. Posizionare peso noto e inviare valore di calibrazione
+Taratura impostata con successo
+
+2. Acquisizione misura... 
+Peso OK:  8388. 608 kg
+
+3. Verifica soglie (min/max)...
+ERROR: ERR-PS-2.09 - Peso fuori range min/max
+ALERT [PESO FUORI RANGE]: 8388.608 kg
+ALERT:  Invio notifica peso fuori range = 8388.608 kg
+
+4. Salvataggio memoria locale...
+Misura salvata su memoria locale
+
+5. Tentativo sincronizzazione cloud... 
+INFO: Tentativo sincronizzazione dati locali con Cloud/DB... 
+  - Invio misura 1:  8388.608 kg
+INFO: Sincronizzazione completata
+
+6. Configurazione Deep Sleep...
+Deep Sleep 20 secondi...
+```
+
+---
+
+## ⚠️ NOTE IMPORTANTI
+
+### **Valori Simulati**
+```cpp
+// ADC simulato a metà scala
+uint32_t adc_raw = 8388608; 
+
+// Risultato:  8388.608 kg (FUORI RANGE!)
+// Normale: con offset e coeff corretti → 0-40 kg
+```
+
+### **In Produzione Servono:**
+1. 📡 Comunicazione SPI/I2C reale con ADC (HX711, ADS1220, etc.)
+2. 🕐 RTC o NTP per timestamp reali
+3. 📶 WiFi/LoRa/GSM per sincronizzazione cloud
+4. 💾 EEPROM/SPIFFS per persistenza calibrazione
+5. 🔋 Gestione batteria e power management
+
+---
+
+## 🎓 CONCLUSIONE
+
+Questo codice implementa un **sistema di pesatura industriale** con:
+- ✅ Gestione errori completa
+- ✅ Calibrazione professionale
+- ✅ Efficienza energetica estrema
+- ✅ Affidabilità dei dati
+- ✅ Modalità offline-first
+
+Ideale per applicazioni IoT come:
+- 🐝 Bilance per arnie
+- 📦 Sistemi di inventario
+- 🏭 Monitoraggio industriale
+- 🌾 Agricoltura di precisione

@@ -7,8 +7,9 @@ L’obiettivo è progettare e sviluppare un sistema **IoT** che raccolga dati da
 
 ## Link rapidi
 - 📌 **Requisiti (documento principale)**: [REQUISITI.md](./REQUISITI.md)
+- 📖 **Guida alla scrittura dei requisiti**: [Come scrivere i requisiti.md](./Come%20scrivere%20i%20requisiti.md)
 - 🧭 **Pagina di coordinamento (Notion)**: [Notion.so](https://www.notion.so/Arnia-Digitale-2e6502f7d91080128666c3fd8d5b8b8b?source=copy_link)
-- 📚 **Guida pratica a Git (commit / push / branch)**: [Guida pratica a Git.pdf](./docs/Guida_pratica_a_Git.pdf) 
+- 📚 **Guida pratica a Git (commit / push / branch)**: [docs/Guida_pratica_a_Git.pdf](./docs/Guida_pratica_a_Git.pdf) 
 
 ---
 

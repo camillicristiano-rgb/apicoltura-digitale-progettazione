@@ -1,0 +1,20 @@
+flowchart TD
+    A[Avvio sensore] --> B[Deep Sleep attivo]
+
+    B --> C{Sveglia ogni 3 ore}
+    C -- NO --> B
+    C -- SI --> D[Disattiva Deep Sleep]
+
+    D --> G[Taratura: differenza peso]
+    G --> H[Conversione valore in kg]
+
+    H --> M{Peso entro limiti min e max}
+
+    M -- NO --> N[Acquisizione misura]
+    N --> O[Invio alert peso fuori range]
+    O --> L[Ritorno in Deep Sleep]
+
+    M -- SI --> I[Associa data]
+    I --> J[Associa ora]
+    J --> K[Salvataggio misura nel DB]
+    K --> L[Ritorno in Deep Sleep]

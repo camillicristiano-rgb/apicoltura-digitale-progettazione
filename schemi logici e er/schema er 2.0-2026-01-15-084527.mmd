@@ -1,0 +1,41 @@
+erDiagram
+    APIARIO {
+        int api_id 
+		varchar(50) api_luogo 
+		varchar(50) api_latitudine 
+		varchar(50) api_longitudine 
+        string api_nome
+    }
+
+    ARNIA {
+        int arn_id 
+        date arn_dataInst
+        boolean arn_piena
+        varchar(50) arn_MacAddress
+    }
+
+    SENSORE {
+        int sen_id 
+        enum sen_tipo
+        boolean sen_stato
+	    float sen_min
+		float sen_max
+    }
+
+    RILEVAZIONE {
+        int ril_id 
+        float ril_dato
+        timeStamp ril_dataOra
+
+    }
+
+    NOTIFICA {
+        int not_id 
+        varchar(50) not_titolo
+        varchar(50) not_desc
+    }
+
+    APIARIO ||--o{ ARNIA : contiene
+    ARNIA ||--o{ SENSORE : ospita
+    SENSORE ||--o{ RILEVAZIONE : genera
+    RILEVAZIONE ||--|| NOTIFICA : attiva

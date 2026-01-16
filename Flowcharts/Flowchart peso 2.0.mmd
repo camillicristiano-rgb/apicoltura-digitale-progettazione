@@ -1,0 +1,32 @@
+---
+config:
+  theme: redux
+  layout: fixed
+---
+flowchart TB
+    A(["Start"]) --> E["Lettura soglia MIN (DB)"]
+    E --> F["Lettura soglia MAX (DB)"]
+    F --> G["Presa campione peso (ESP)"]
+    G --> H["Taratura / Conversione peso (kg)"]
+    I{"Peso > MAX?"} -- Sì --> J["Alert: peso sopra soglia"]
+    I -- No --> K{"Peso &lt; MIN?"}
+    K -- Sì --> L["Alert: peso sotto soglia"]
+    K -- No --> M["Peso OK"]
+    M --> N["Associa data e ora"]
+    N --> O["Salvataggio misura nel DB"]
+    H --> n1@{ label: "<span style=\"color:\">campione != errore</span>" }
+    n1 -- Sì --> I
+    n1 -- No --> n4@{ label: "<span style=\"color:\">Salva campione e timestamp su ESP32</span>" }
+    n4 --> n5@{ label: "<span style=\"color:\">Invio Alert a DB</span>" }
+    n5 --> P["Ritorno Deep Sleep 3 ore"]
+    J --> P
+    L --> P
+    O --> P
+    n2[" "]
+    n3[" "]
+
+    n1@{ shape: diam}
+    n4@{ shape: rect}
+    n5@{ shape: rect}
+    n2@{ shape: anchor}
+    n3@{ shape: anchor}
