@@ -1,17 +1,9 @@
-﻿ESP32-CAM
+## ESP32-CAM (Modulo Fotografico)
 
-| \*\*Caso d'Uso\*\* | \*\*Cosa fa il sistema\*\* | \*\*Dove va il dato\*\* | \*\*Messaggio / Visualizzazione\*\* |
+| Caso d'Uso | Cosa fa il sistema | Dove va il dato | Messaggio / Visualizzazione |
 
-\| --- | --- | --- | --- |
+| **Ispezione Visiva** | Scatta foto su comando remoto. | **Proprietario** | **Foto Ricevuta:** Visualizzata in chat (es. Telegram). |
 
-| \*\*Ispezione Visiva\*\* | Scatta foto quando premi un tasto sul telefono. | \*\*Proprietario\*\* | \*\*Foto Ricevuta:\*\* L'immagine viene mostrata nella chat (es. Telegram). |
+| **Diario di Volo** | Foto automatica ogni 15/30 minuti. | **Server** | **Archivio:** Salvataggio in galleria storica per analisi cambiamenti. |
 
-\| --- | --- | --- | --- |
-
-| \*\*Diario di Volo\*\* | Scatta una foto automatica ogni 15/30 minuti | \*\*Server\*\* | \*\*Archivio:\*\* Foto salvata nella galleria storica per vedere i cambiamenti nel tempo. |
-
-\| --- | --- | --- | --- |
-
-| \*\*Stato Batteria\*\* | Controlla la tensione dell'ESP32-CAM. | \*\*Server\*\* | \*\*Info:\*\* Messaggio periodico sullo stato di carica del pannello solare. |
-
-\| --- | --- | --- | --- |
+| **Stato Batteria** | Controlla la tensione dell'ESP32-CAM. | **Server** | **Info:** Stato di carica del pannello solare. |
