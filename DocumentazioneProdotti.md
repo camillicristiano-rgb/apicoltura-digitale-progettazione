@@ -84,5 +84,3 @@ Prevenzione di problemi (surriscaldamento, furti)
 Sistema autonomo ed ecologico
 
 Risparmio economico nel lungo periodo
-
-Billing of Materials: Billing of materials
