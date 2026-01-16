@@ -41,7 +41,7 @@ Il codice implementa 6 controlli automatici basati sui casi d'uso dell'apicoltur
 
 **Soglie Configurabili**
 
-cpp
+```cpp
 
 # define TEMP_ALTA 35.0
 
@@ -52,56 +52,56 @@ cpp
 # define UMID_CONDENSA 90.0
 
 # define UMID_ALLAGAMENTO 99.0
-
+```
 **1\. Controllo Temperatura Elevata**
 
 **Quando:** temperatura > 35°C  
 **Tipo:** ALERT  
 **Azione:** Avvisa rischio stress termico per le api
 
-cpp
+```cpp
 
 if (temperatura > TEMP_ALTA) {
 
 Serial.println("🚨 ALERT: TEMPERATURA ELEVATA!");
 
 }
-
+```
 **2\. Maturazione Miele**
 
 **Quando:** umidità scende sotto 60%  
 **Tipo:** INFO  
 **Azione:** Segnala che il miele è pronto per il raccolto
 
-cpp
+```cpp
 
 if (umidita &lt; UMID_MATURAZIONE && ultimaUmidita &gt;= UMID_MATURAZIONE) {
 
 Serial.println("ℹ️ INFO: Maturazione Miele");
 
 }
-
+```
 **3\. Sciamatura**
 
 **Quando:** picco improvviso > 85%  
 **Tipo:** ALLARME  
 **Azione:** Richiede controllo immediato dell'arnia
 
-cpp
+```cpp
 
 if (umidita > UMID_SCIAMATURA && ultimaUmidita <= UMID_SCIAMATURA) {
 
 Serial.println("🚨 ALLARME: POSSIBILE SCIAMATURA!");
 
 }
-
+```
 **4\. Condensa Invernale**
 
 **Quando:** umidità > 90% per oltre 1 ora  
 **Tipo:** ATTENZIONE  
 **Azione:** Segnala rischio gocciolamento
 
-cpp
+```cpp
 
 if (umidita > UMID_CONDENSA) {
 
@@ -116,14 +116,14 @@ Serial.println("⚠️ ATTENZIONE: Condensa Prolungata");
 }
 
 }
-
+```
 **5\. Sensore Bloccato**
 
 **Quando:** 10 letture consecutive identiche  
 **Tipo:** MANUTENZIONE  
 **Azione:** Indica probabile presenza di propoli
 
-cpp
+```cpp
 
 if (abs(umidita - ultimaUmidita) < 0.1) {
 
@@ -136,14 +136,14 @@ Serial.println("🔧 MANUTENZIONE: Sensore Bloccato");
 }
 
 }
-
+```
 **6\. Allagamento/Saturazione**
 
 **Quando:** umidità ≥ 99%  
 **Tipo:** CRITICO  
 **Azione:** Richiede verifica urgente integrità arnia
 
-cpp
+```cpp
 
 if (umidita >= UMID_ALLAGAMENTO) {
 
