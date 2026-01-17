@@ -1,9 +1,18 @@
 erDiagram
+    UTENTE{
+        int ute_id
+        varchar(50) ute_username
+        varchar(128) ute_password
+        varchar(5) ute_token 
+		timestamp ute_scadenzaToken 
+        boolean ute_admin
+    }
+
     APIARIO {
         int api_id 
 		varchar(50) api_luogo 
-		varchar(50) api_latitudine 
-		varchar(50) api_longitudine 
+		varchar(50) api_lat 
+		varchar(50) api_lon
         string api_nome
     }
 
@@ -16,17 +25,20 @@ erDiagram
 
     SENSORE {
         int sen_id 
-        enum sen_tipo
         boolean sen_stato
 	    float sen_min
 		float sen_max
+    }
+
+    TIPO{
+        int tip_id
+        varchar(50) tip_descrizione
     }
 
     RILEVAZIONE {
         int ril_id 
         float ril_dato
         timeStamp ril_dataOra
-
     }
 
     NOTIFICA {
@@ -37,5 +49,6 @@ erDiagram
 
     APIARIO ||--o{ ARNIA : contiene
     ARNIA ||--o{ SENSORE : ospita
+    SENSORE }o--|| TIPO : é
     SENSORE ||--o{ RILEVAZIONE : genera
     RILEVAZIONE ||--|| NOTIFICA : attiva

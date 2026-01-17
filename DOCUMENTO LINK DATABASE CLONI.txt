@@ -1,0 +1,54 @@
+CLONE 1 (LOGICA ESP):
+	API: 2e1c9e05dd157fa74d69bfeab6b520b7c1e58
+	URL DATABASE: clonedb1-7b36.restdb.io 
+	URL apiari: https://clonedb1-7b36.restdb.io/rest/apiari
+	URL arnie: https://clonedb1-7b36.restdb.io/rest/arnie
+	URL sensori: https://clonedb1-7b36.restdb.io/rest/sensori
+	URL rilevazioni: https://clonedb1-7b36.restdb.io/rest/rilevazioni
+	URL notifiche: https://clonedb1-7b36.restdb.io/rest/notifiche
+	URL tipi: https://clonedb1-7b36.restdb.io/rest/tipi
+	URL utenti: https://clonedb1-7b36.restdb.io/rest/utenti
+
+Clone 2 (RETI):
+    API: fff4abb3297c4466e05be7ebbebf81ccd8f2e
+    URL DATABASE: clonedb2gyuthj-ae10.restdb.io 
+    URL apiari: https://clonedb2gyuthj-ae10.restdb.io/rest/apiari 
+    URL arnie: https://clonedb2gyuthj-ae10.restdb.io/rest/arnie  
+    URL sensori: https://clonedb2gyuthj-ae10.restdb.io/rest/sensori
+    URL rilevazioni: https://clonedb2gyuthj-ae10.restdb.io/rest/rilevazioni  
+    URL notifiche: https://clonedb2gyuthj-ae10.restdb.io/rest/notifiche  
+    URL tipi: https://clonedb2gyuthj-ae10.restdb.io/rest/tipi 
+    URL utenti: https://clonedb2gyuthj-ae10.restdb.io/rest/utenti 
+
+CLONE 3 (HARDWARE):
+	API: 114337de72d8ef5a56853ac836b2d461c21b5
+	URL DATABASE: clonedb3dargendamico-1035.restdb.io 
+	URL apiari: https://clonedb3dargendamico-1035.restdb.io/rest/apiari
+	URL arnie: https://clonedb3dargendamico-1035.restdb.io/rest/arnie
+	URL sensori: https://clonedb3dargendamico-1035.restdb.io/rest/sensori
+	URL rilevazioni: https://clonedb3dargendamico-1035.restdb.io/rest/rilevazioni
+	URL notifiche: https://clonedb3dargendamico-1035.restdb.io/rest/notifiche
+	URL tipi: https://clonedb3dargendamico-1035.restdb.io/rest/tipi
+	URL utenti: https://clonedb3dargendamico-1035.restdb.io/rest/utenti
+
+Clone 4 (DATABASE):
+    API: e5b16228e51b7a1a842152612a80caacf242b
+    URL DATABASE: clonedb4pippocotti-d95f.restdb.io
+    URL apiari: https://clonedb4pippocotti-d95f.restdb.io/rest/apiari
+    URL arnie: https://clonedb4pippocotti-d95f.restdb.io/rest/arnie  
+    URL sensori: https://clonedb4pippocotti-d95f.restdb.io/rest/sensori
+    URL rilevazioni: https://clonedb4pippocotti-d95f.restdb.io/rest/rilevazioni
+    URL notifiche: https://clonedb4pippocotti-d95f.restdb.io/rest/notifiche
+    URL tipi: https://clonedb4pippocotti-d95f.restdb.io/rest/tipi
+    URL utenti: https://clonedb4pippocotti-d95f.restdb.io/rest/utenti
+
+CLONE 5 (SCORTA):
+	API: 28ade382b313db86d3cab6da35d50b0666f2f
+	URL DATABASE: clonedb5dhsjjhhfudii-66f3.restdb.io
+	URL apiari: https://clonedb5dhsjjhhfudii-66f3.restdb.io/rest/apiari
+	URL arnie: https://clonedb5dhsjjhhfudii-66f3.restdb.io/rest/arnie
+	URL sensori: https://clonedb5dhsjjhhfudii-66f3.restdb.io/rest/sensori
+	URL rilevazioni: https://clonedb5dhsjjhhfudii-66f3.restdb.io/rest/rilevazioni
+	URL notifiche: https://clonedb5dhsjjhhfudii-66f3.restdb.io/rest/notifiche
+	URL tipi: https://clonedb5dhsjjhhfudii-66f3.restdb.io/rest/tipi
+	URL utenti:https://clonedb5dhsjjhhfudii-66f3.restdb.io/rest/utenti

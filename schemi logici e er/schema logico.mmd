@@ -1,10 +1,19 @@
 erDiagram
 	direction TB
+    UTENTE{
+        int ute_id PK ""
+        varchar(50) ute_username ""
+        varchar(128) ute_password ""
+	 	varchar(5) ute_token ""
+		timestamp ute_scadenzaToken ""
+        boolean ute_admin ""
+    }
+
 	APIARIO {
 		int api_id PK ""  
 		varchar(50) api_luogo  "" 
-		varchar(50) api_latitudine ""
-		varchar(50) api_longitudine "" 
+		varchar(50) api_lat ""
+		varchar(50) api_lon "" 
 		varchar(50) api_nome  ""  
 	}
 
@@ -17,13 +26,18 @@ erDiagram
 	}
 
 	SENSORE {
-		int sen_id PK ""  
-		enum sen_tipo  ""  
+		int sen_id PK ""   
 		boolean sen_stato  ""  
 		float sen_min ""
 		float sen_max ""
-		int sen_arn_id FK ""  
+		int sen_arn_id FK "" 
+		int sen_tip_id FK "" 
 	}
+
+	TIPO{
+        int tip_id ""
+        varchar(50) tip_descrizione ""
+    }
 
 	RILEVAZIONE {
 		int ril_id PK ""  
