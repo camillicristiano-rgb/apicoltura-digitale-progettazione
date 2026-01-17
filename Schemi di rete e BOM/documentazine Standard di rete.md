@@ -1,4 +1,6 @@
 
+Documentazione delle tecnologie e Standard a livello di rete dei dispositivi
+
 ### 1. Introduzione
 
 Questo documento descrive gli standard di rete necessari per la connessione e l’integrazione tra:
@@ -130,9 +132,10 @@ Il modulo ESP32-CAM si connette alla rete locale creata dal router tramite Wi-Fi
 
 ----------
 
-## LINK UTILI PER APPROFONDIRE
+## LINK ALLE FONTI USATE
 
-ESP32 Datasheet (Espressif) — [https://documentation.espressif.com/esp32_datasheet_en.html](https://documentation.espressif.com/esp32_datasheet_en.html)
+ESP32 Datasheet (Espressif) —
 
-Strong 4G LTE 300 Mini — Specifiche prodotto (Strong.eu)  
-Strong LTE Mini – Specifiche dettagliate rivenditori
+[https://documentation.espressif.com/esp32_datasheet_en.html](https://documentation.espressif.com/esp32_datasheet_en.html)
+
+Strong 4G LTE 300 Mini — [https://www.strong-eu.com/it/products/home-networking/4g-lte-router-300-mini-4grouter300m](https://www.strong-eu.com/it/products/home-networking/4g-lte-router-300-mini-4grouter300m)

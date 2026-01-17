@@ -1,0 +1,79 @@
+# Scheda Tecnica di Progetto: Specifiche Dimensionali  
+
+Oggetto: Documentazione tecnica delle specifiche dimensionali e funzionali della componentistica hardware.
+
+Unità di Riferimento: Millimetri (mm) secondo standard ISO.
+
+## 1. Introduzione
+
+Il presente documento riporta le specifiche tecniche e dimensionali dei componenti selezionati per l'implementazione del sistema in oggetto. Le misurazioni sono espresse nel formato $L \times P \times A$ (Larghezza x Profondità x Altezza).
+
+## 2. distinta Componenti e Specifiche Dimensionali
+
+### 2.1 Modulo di Rete e Connettività
+
+-   Componente: Router 4G LTE
+    
+-   Modello: 4GROUTER300M (Cudy)
+    
+-   Dimensioni d'Ingombro: $155 \times 155 \times 45$ mm
+    
+-   Caratteristiche Tecniche: Dispositivo di rete compatto (Mini), throughput massimo nominale di 300 Mbps. Supporto connettività LTE.
+    
+
+### 2.2 Sistema di Generazione Fotovoltaica
+
+-   Componente: Modulo Fotovoltaico Monocristallino
+    
+-   Produttore/Modello: ECO-WORTHY 25W
+    
+-   Dimensioni Pannello: $420 \times 300 \times 17$ mm
+    
+-   Specifiche Elettriche: Tensione nominale 12V.
+    
+-   Note: Dimensioni equivalenti in pollici: $16.54" \times 11.89" \times 0.98"$. Tecnologia a celle monocristalline ad alta efficienza.
+    
+
+### 2.3 Sistema di Accumulo Energetico
+
+-   Componente: Accumulatore LiFePO4 (Litio-Ferro-Fosfato)
+    
+-   Produttore/Modello: ECO-WORTHY 12.8V 8Ah
+    
+-   Dimensioni (Collo/Imballaggio): $183 \times 139 \times 101$ mm
+    
+-   Specifiche Ponderali: 1.05 kg
+    
+-   Nota Tecnica: Le dimensioni riportate fanno riferimento all'ingombro lordo del collo. Assicurare tolleranze adeguate per l'alloggiamento del componente disimballato.
+    
+
+### 2.4 Gestione della Carica
+
+-   Componente: Regolatore di Carica Solare
+    
+-   Produttore/Modello: ECO-WORTHY 10A
+    
+-   Dimensioni d'Ingombro: $120 \times 67 \times 21$ mm
+    
+-   Funzionalità: Controller di carica per sistemi fotovoltaici (compatibilità PWM/MPPT da verificare in fase di installazione in base alla revisione hardware).
+    
+
+### 2.5 Minuterie e Fissaggio
+
+-   Componente: Elementi di serraggio (Fascette)
+    
+-   Produttore/Riferimento: ERKO
+    
+-   Dimensioni: $150 \times 2.5$ mm
+    
+-   Materiale: Poliammide nera.
+    
+-   Proprietà: Resistenza ai raggi UV, idonee per installazioni esposte o esterne.
+    
+
+# 3. link documentazione utile:
+
+-   Eco Worthy products: [https://www.eco-worthy.com/pages/eco-worthy-product-manual-download#:~:text=Product%20Manual%20Download%20for%20ECO%2DWORTHY%20Solar%20Products](https://www.eco-worthy.com/pages/eco-worthy-product-manual-download#:~:text=Product%20Manual%20Download%20for%20ECO%2DWORTHY%20Solar%20Products)
+    
+-   Strong:
+    [https://www.strong-eu.com/it/products/home-networking/4g-lte-router-300-mini-4grouter300m](https://www.strong-eu.com/it/products/home-networking/4g-lte-router-300-mini-4grouter300m)
