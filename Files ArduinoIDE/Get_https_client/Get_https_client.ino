@@ -6,21 +6,20 @@
 
 // Configurazione WiFi
 #define STASSID "Gruppo4Network"
-#define STAPSK "Networks"
+#define STAPSK  "Networks"
 
-// Configurazione RestDB
-#define RESTDB_URL "https://clonedb1-7b36.restdb.io"
-#define API_KEY "2e1c9e05dd157fa74d69bfeab6b520b7c1e58"
-
-// ID del record da recuperare (modificalo con un ID valido del tuo DB)
-#define RECORD_ID "678a1b2c3d4e5f6g7h8i9j0k"  // ⚠️ SOSTITUISCI CON UN ID REALE
+// Configurazione RestDB - CLONE 5
+#define RESTDB_URL "https://clonedb5dhsjjhhfudii-66f3.restdb.io"
+#define API_KEY "28ade382b313db86d3cab6da35d50b0666f2f"
+#define URLsensori"https://clonedb5dhsjjhhfudii-66f3.restdb.io/rest/sensori"
 
 void setup() {
   Serial.begin(115200);
   delay(1000);
   
-  Serial.println("\n=== ESP32-CAM RestDB GET Test ===");
-  Serial.println("Avvio connessione WiFi...");
+  Serial.println("\n=== ESP32-CAM RestDB - GET Dati ===");
+  Serial.println("Database: CLONE 5");
+  Serial.println("Connessione WiFi...");
   
   WiFi.mode(WIFI_STA);
   WiFi.begin(STASSID, STAPSK);
@@ -31,177 +30,260 @@ void setup() {
     Serial.print(".");
     attempts++;
   }
-  
   Serial.println();
   
   if (WiFi.status() == WL_CONNECTED) {
     Serial.println("✓ WiFi connesso!");
     Serial.print("  IP: ");
     Serial.println(WiFi.localIP());
-    Serial.print("  RSSI: ");
-    Serial.print(WiFi.RSSI());
-    Serial.println(" dBm");
     
-    // ===== GET SINGOLO RECORD =====
-    getSingoloRecord();
+    // Lettura dati dal database
+    leggiDati();
     
   } else {
     Serial.println("✗ Connessione WiFi fallita!");
-    Serial.println("Verifica SSID e password, poi resetta ESP32");
   }
   
-  Serial.println("\n=== Setup completato ===");
-  Serial.println("Premi RESET per recuperare nuovamente il record");
+  Serial.println("\n=== Completato ===");
+  Serial.println("Premi RESET per nuova lettura");
+  
+  WiFi.disconnect(true);
+  WiFi.mode(WIFI_OFF);
 }
 
 void loop() {
-  delay(1000);
+  delay(10000);
 }
 
-// ===== FUNZIONE GET SINGOLO RECORD =====
-void getSingoloRecord() {
-  Serial.println("\n--- Recupero singolo record ---");
+void leggiDati() {
+  Serial.println("\n--- GET dati dal database ---");
   
   WiFiClientSecure *client = new WiFiClientSecure;
   
   if(client) {
-    client->setInsecure();  // Per sviluppo
+    client->setInsecure();
     
     HTTPClient https;
     
-    // Endpoint per singolo record: /rest/COLLECTION/ID
     String endpoint = RESTDB_URL;
-    endpoint += "/rest/rilevazioni/";  // Cambia collection se necessario
-    endpoint += RECORD_ID;
     
-    Serial.print("[HTTPS] Connessione a: ");
+    // ===== SCEGLI LA TABELLA DA LEGGERE =====
+    // Opzione 1: Leggi SENSORI (per sen_min e sen_max)
+    endpoint += "/rest/sensori";
+    
+    // Opzione 2: Leggi RILEVAZIONI (per ril_dataOra timestamp)
+    // endpoint += "/rest/rilevazioni";
+    
+    // Puoi anche filtrare o ordinare:
+    // endpoint += "?max=10&sort=_created&dir=-1"; // ultimi 10 record
+    
+    Serial.print("[GET] ");
     Serial.println(endpoint);
     
     if (https.begin(*client, endpoint)) {
       
-      // Headers richiesti
       https.addHeader("Content-Type", "application/json");
       https.addHeader("x-apikey", API_KEY);
       https.addHeader("cache-control", "no-cache");
       
-      Serial.print("[HTTP] Richiesta GET in corso");
       int httpCode = https.GET();
-      Serial.println(" ...fatto!");
       
       if (httpCode > 0) {
-        Serial.printf("[HTTP] Codice risposta: %d ", httpCode);
+        Serial.printf("[HTTP] Codice: %d ", httpCode);
         
         if (httpCode == HTTP_CODE_OK) {
           Serial.println("✓ SUCCESS");
           
           String payload = https.getString();
           
-          Serial.println("\n--- Risposta del server ---");
+          // Mostra la risposta RAW del server
+          Serial.println("\n--- RISPOSTA SERVER (RAW) ---");
           Serial.println(payload);
-          Serial.println("---------------------------");
+          Serial.println("-----------------------------\n");
           
-          // Parsing JSON
-          StaticJsonDocument<1024> doc;  // Aumentato per dati completi
-          DeserializationError error = deserializeJson(doc, payload);
+          JsonDocument responseDoc;
+          DeserializationError error = deserializeJson(responseDoc, payload);
           
           if (!error) {
-            Serial.println("\n✓ Record recuperato con successo!");
-            Serial.println("\n--- Dati estratti ---");
             
-            // Estrai i campi (adatta ai tuoi campi reali)
-            if (doc.containsKey("_id")) {
-              Serial.print("  ID: ");
-              Serial.println(doc["_id"].as<const char*>());
+            if (responseDoc.is<JsonArray>()) {
+              JsonArray array = responseDoc.as<JsonArray>();
+              
+              Serial.println("╔════════════════════════════════════════════════╗");
+              Serial.println("║              DATI DAL DATABASE                 ║");
+              Serial.println("╠════════════════════════════════════════════════╣");
+              
+              if (array.size() == 0) {
+                Serial.println("║ ⚠️  NESSUN DATO TROVATO NEL DATABASE!         ║");
+                Serial.println("║                                               ║");
+                Serial.println("║ Possibili motivi:                             ║");
+                Serial.println("║ 1. La tabella è vuota                         ║");
+                Serial.println("║ 2. Stai leggendo la tabella sbagliata         ║");
+                Serial.println("║ 3. Devi prima inserire dati nel database      ║");
+                Serial.println("╚════════════════════════════════════════════════╝");
+              } else {
+                int count = 0;
+                for (JsonObject obj : array) {
+                  count++;
+                  
+                  Serial.print("║ Record #");
+                  Serial.println(count);
+                  Serial.println("╟────────────────────────────────────────────────╢");
+                  
+                  // TABELLA SENSORI
+                  if (!obj["sen_min"].isNull()) {
+                    Serial.print("║ Soglia MIN:  ");
+                    Serial.println(obj["sen_min"].as<float>(), 2);
+                  }
+                  
+                  if (!obj["sen_max"].isNull()) {
+                    Serial.print("║ Soglia MAX:  ");
+                    Serial.println(obj["sen_max"].as<float>(), 2);
+                  }
+                  
+                  // TABELLA RILEVAZIONI
+                  if (!obj["ril_dataOra"].isNull()) {
+                    Serial.print("║ Timestamp:   ");
+                    Serial.println(obj["ril_dataOra"].as<const char*>());
+                  }
+                  
+                  if (!obj["ril_dato"].isNull()) {
+                    Serial.print("║ Dato:        ");
+                    Serial.println(obj["ril_dato"].as<float>(), 2);
+                  }
+                  
+                  // Timestamp automatico RestDB (presente in tutte le tabelle)
+                  if (!obj["_created"].isNull()) {
+                    Serial.print("║ Creato:      ");
+                    Serial.println(obj["_created"].as<const char*>());
+                  }
+                  
+                  Serial.println("╚════════════════════════════════════════════════╝");
+                  Serial.println();
+                  
+                  // Limita a primi 5 per non riempire il serial
+                  if (count >= 5) {
+                    Serial.println("(mostrati primi 5 record...)");
+                    break;
+                  }
+                }
+                
+                Serial.print("Totale record trovati: ");
+                Serial.println(array.size());
+              }
+              
+            } else if (responseDoc.is<JsonObject>()) {
+              // Singolo record
+              Serial.println("╔════════════════════════════════════════════════╗");
+              Serial.println("║              SINGOLO RECORD                    ║");
+              Serial.println("╠════════════════════════════════════════════════╣");
+              
+              if (!responseDoc["sen_min"].isNull()) {
+                Serial.print("║ Soglia MIN:  ");
+                Serial.println(responseDoc["sen_min"].as<float>(), 2);
+              }
+              
+              if (!responseDoc["sen_max"].isNull()) {
+                Serial.print("║ Soglia MAX:  ");
+                Serial.println(responseDoc["sen_max"].as<float>(), 2);
+              }
+              
+              if (!responseDoc["ril_dataOra"].isNull()) {
+                Serial.print("║ Timestamp:   ");
+                Serial.println(responseDoc["ril_dataOra"].as<const char*>());
+              }
+              
+              if (!responseDoc["ril_dato"].isNull()) {
+                Serial.print("║ Dato:        ");
+                Serial.println(responseDoc["ril_dato"].as<float>(), 2);
+              }
+              
+              if (!responseDoc["_created"].isNull()) {
+                Serial.print("║ Creato:      ");
+                Serial.println(responseDoc["_created"].as<const char*>());
+              }
+              
+              Serial.println("╚════════════════════════════════════════════════╝");
             }
-            
-            if (doc.containsKey("weight")) {
-              Serial.print("  Peso: ");
-              Serial.println(doc["weight"].as<int>());
-            }
-            
-            if (doc.containsKey("humidity")) {
-              Serial.print("  Umidità: ");
-              Serial.println(doc["humidity"].as<int>());
-            }
-            
-            if (doc.containsKey("temperature")) {
-              Serial.print("  Temperatura: ");
-              Serial.println(doc["temperature"].as<int>());
-            }
-            
-            if (doc.containsKey("sound_level")) {
-              Serial.print("  Livello suono: ");
-              Serial.println(doc["sound_level"].as<int>());
-            }
-            
-            Serial.println("---------------------");
             
           } else {
             Serial.print("✗ Errore parsing JSON: ");
             Serial.println(error.c_str());
           }
           
-        } else if (httpCode == 404) {
-          Serial.println("✗ RECORD NON TROVATO");
-          Serial.println("  Verifica che l'ID sia corretto!");
-          
         } else {
           Serial.println("✗ ERRORE");
+          String errorPayload = https.getString();
+          if (errorPayload.length() > 0) {
+            Serial.println("\n--- Dettagli errore ---");
+            Serial.println(errorPayload);
+            Serial.println("-----------------------");
+          }
         }
-        
       } else {
-        Serial.printf("\n✗ [HTTP] Errore connessione: %s\n", 
-                     https.errorToString(httpCode).c_str());
+        Serial.printf("\n✗ Errore connessione: %s\n", https.errorToString(httpCode).c_str());
       }
       
       https.end();
       
     } else {
-      Serial.println("✗ [HTTPS] Impossibile iniziare connessione!");
+      Serial.println("✗ HTTPS begin fallito!");
     }
     
     delete client;
     
   } else {
-    Serial.println("✗ Impossibile creare client sicuro!");
+    Serial.println("✗ Impossibile creare client!");
   }
 }
 
 /*
- * ===== COME USARE QUESTO CODICE =====
+ * ╔═══════════════════════════════════════════════════════════╗
+ * ║           CODICE CORRETTO - DATABASE CLONE 5             ║
+ * ╚═══════════════════════════════════════════════════════════╝
  * 
- * 1. Sostituisci RECORD_ID (riga 16) con un ID valido dal tuo database
- *    Esempio: "678a1b2c3d4e5f6g7h8i9j0k"
+ * PROBLEMA RISOLTO:
+ * ✓ La tabella SENSORI era vuota (0 record)
+ * ✓ Aggiunto supporto per ril_dataOra (timestamp RILEVAZIONI)
+ * ✓ Mostra risposta RAW per debug
+ * ✓ Avvisa se database vuoto
  * 
- * 2. Carica il codice su ESP32-CAM
+ * ═══════════════════════════════════════════════════════════
+ * TABELLE DISPONIBILI:
+ * ═══════════════════════════════════════════════════════════
  * 
- * 3. Apri Serial Monitor (115200 baud)
+ * SENSORI (/rest/sensori):
+ *   - sen_min (soglia minima)
+ *   - sen_max (soglia massima)
+ *   - sen_stato (attivo/non attivo)
  * 
- * 4. Premi RESET - vedrai il record recuperato
+ * RILEVAZIONI (/rest/rilevazioni):
+ *   - ril_dato (valore misurato)
+ *   - ril_dataOra (timestamp) ← QUESTO!
  * 
- * ===== COME TROVARE UN ID VALIDO =====
+ * Tutte le tabelle hanno anche:
+ *   - _created (timestamp creazione automatico RestDB)
+ *   - _changed (timestamp ultima modifica)
  * 
- * Opzione 1: Usa il tuo codice POST originale
- *   - Invia un record
- *   - Copia l'ID dalla risposta ("_id": "...")
+ * ═══════════════════════════════════════════════════════════
+ * COME USARE:
+ * ═══════════════════════════════════════════════════════════
  * 
- * Opzione 2: Vai su RestDB dashboard
- *   - Apri la collection "rilevazioni"
- *   - Clicca su un record
- *   - Copia l'ID mostrato
+ * 1. Cambia la riga 52 per scegliere la tabella:
+ *    endpoint += "/rest/sensori";      ← soglie min/max
+ *    endpoint += "/rest/rilevazioni";  ← dati + timestamp
  * 
- * ===== ALTRE COLLECTION =====
+ * 2. Se il database è vuoto, devi prima inserire dati
+ *    usando il POST o manualmente da RestDB.io
  * 
- * Cambia riga 60 per altre collection:
- * endpoint += "/rest/apiari/";
- * endpoint += "/rest/arnie/";
- * endpoint += "/rest/sensori/";
- * endpoint += "/rest/notifiche/";
+ * 3. Il codice mostra la risposta RAW per capire
+ *    esattamente cosa c'è nel database
  * 
- * ===== VANTAGGI =====
- * 
- * ✓ Recupera un singolo record specifico
- * ✓ Parsing automatico dei dati JSON
- * ✓ Gestione errori (404 se ID non esiste)
- * ✓ Output dettagliato per debugging
+ * ═══════════════════════════════════════════════════════════
+ * OUTPUT:
+ * ═══════════════════════════════════════════════════════════
+ * Vedrai:
+ * - La risposta completa del server (JSON)
+ * - Dati formattati con sen_min, sen_max, ril_dataOra
+ * - Avviso se database vuoto
  */
