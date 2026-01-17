@@ -169,6 +169,15 @@ Un utente può gestire più apiari in posizioni diverse.
 **RF-DB-06 — Gestione Multi-Arnia**
 Ogni apiario può contenere più arnie, ciascuna monitorata indipendentemente.
 
+### Requisiti non funzionali
+
+- **RNF-DB-01 — Retention**: Lo storico misure deve essere conservato per almeno 2 mesi.  
+- **RNF-DB-02 — Misurazione**: Avere misurazioni su richiesta.
+- **RNF-DB-03 — Notifica**: Identificare e segnalare problemi o misurazioni con una notifica.
+- **RNF-DB-04 — Backup**: Backup automatici ogni settimana e successivamente fare pulizia.(evoluzione futura)
+- **RNF-DB-05 — Salvataggio**: Salvare nel log gli accessi.(evoluzione futura)
+- **RNF-DB-06 — Read/Write**: Il software deve permettere una differente abilità per ogni utente, solo un utente speciale può modificare e avere visione di tutte le arnie, tutti gli altri utenti devono essere abilitati.
+
 ---
 
 ### 5.2 Gruppo B — Hardware Sensori
