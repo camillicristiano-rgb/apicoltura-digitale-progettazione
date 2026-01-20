@@ -2,6 +2,18 @@ import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 
 function App() {
+  const [dati, setDati] = useState([]);
+  useEffect(() => {
+    fetch("https://dbarniadigitale-0abe.restdb.io/rest/sensori", {
+      headers: {
+        "x-apikey": "696f697a3731f7b3333fd7d3",
+        "Content-Type": "application/json"
+      }
+    })
+      .then(res => res.json())
+      .then(data => setDati(data))
+      .catch(err => console.error(err));
+  }, []);
   return (
     <div className="mx-auto max-w-7xl p-8 text-center">
       <div className="flex justify-center">
@@ -39,6 +51,13 @@ function App() {
       <p className="text-gray-400">
         Click on the Vite and React logos to learn more
       </p>
+      <h1>Dati dal database:</h1>
+      <div className="p-4">
+        {dati.map(sen => (
+          <p className="font-bold" key={sen._id}> {sen.sen_modello}
+          </p>
+        ))}
+      </div>
     </div>
   );
 }
