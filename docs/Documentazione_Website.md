@@ -31,25 +31,25 @@ Il sistema non utilizza username/password, ma chiavi univoche.
 **1. Login Apicoltore**
 * **UI Elements:**
     * Campo Input: "Inserisci la tua API Key".
-    * Bottone: "Accedi".
-    * Footer: Link "Accesso Admin" (per cambiare vista).
-* **Comportamento:** Validazione chiave utente -> Redirect a `/dashboard`.
+    * Bottone: "Login".
+    * Footer: Link "Sei un admin?" (apre l'interfaccia di login per gli admin).
+* **Comportamento:** Validazione chiave utente -> Redirect a `/home`.
 
 **2. Login Admin**
 * **UI Elements:**
     * Campo Input: "Inserisci API Key Amministratore".
-    * Bottone: "Entra nel Pannello Admin".
+    * Bottone: "Login".
 * **Comportamento:** Validazione chiave admin -> Redirect a `/dashboard`.
 
-### B. Home Dashboard (Vista Apicoltore)
-Il centro operativo per l'utente.
+### B. Home (Vista Apicoltore)
+Il centro operativo per l'utente (Dashboard Apicoltore).
 
 * **Header:** Logo, Icona Notifiche (Alert), Tasto Logout.
 * **Stato Generale:** Box riassuntivo (es. "Tutto OK" o "2 Arnie critiche").
 * **Lista Apiari:** Elenco card/lista degli apiari assegnati.
 * **Azioni:** Collegamenti rapidi alle ispezioni o manutenzioni.
 
-### C. Dettaglio Apiario
+### C. Apiario
 Vista contenitore delle arnie.
 
 * **Info Testata:** Nome Apiario, Posizione/Mappa.
@@ -57,18 +57,18 @@ Vista contenitore delle arnie.
 * **Stato Visivo:** Ogni card arnia possiede un indicatore (es. bordo colorato o icona semaforo) che riflette lo stato di salute basato sui sensori.
 
 ### D. Dettaglio Arnia (Scheda Sensori)
-Pagina di analisi profonda.
+Pagina di analisi profonda di ciascun arnia.
 
 * **Info:** Identificativo Arnia e coordinate.
 * **Sensori Real-time:**
-    * 🌡️ **Temperatura:** Gradi centigradi interni.
-    * ⚖️ **Peso:** Kg attuali (stima scorte/miele).
-    * 💧 **Umidità:** Percentuale relativa.
+    * **Temperatura:** Gradi centigradi interni.
+    * **Peso:** Kg attuali (stima scorte/miele).
+    * **Umidità:** Percentuale relativa.
 * **Grafici:** Sezione per visualizzare l'andamento storico (ultime 24h / 7gg) dei tre parametri sopra citati.
 * **Note:** Area testo per annotazioni o storico interventi manuali.
 
 ### E. Pannello Admin
-Interfaccia di gestione (Back-office).
+Interfaccia di gestione (Admin Dashboard).
 
 * **Gestione Utenti:** Tabella con Nome, Ruolo, API Key assegnata.
 * **Azioni:**
