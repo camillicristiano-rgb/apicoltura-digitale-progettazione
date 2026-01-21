@@ -64,6 +64,8 @@ Pagina di analisi profonda di ciascun arnia.
     * **Temperatura:** Gradi centigradi interni.
     * **Peso:** Kg attuali (stima scorte/miele).
     * **Umidità:** Percentuale relativa.
+    * **Livello Acqua:** Livello acqua.
+    * **Rumori:** Ambiente tranquillo/non tranquillo.
 * **Grafici:** Sezione per visualizzare l'andamento storico (ultime 24h / 7gg) dei tre parametri sopra citati.
 * **Note:** Area testo per annotazioni o storico interventi manuali.
 
@@ -77,3 +79,7 @@ Interfaccia di gestione (Admin Dashboard).
 * **Configurazione Apiari:** CRUD (Create, Read, Update, Delete) degli apiari e assegnazione agli utenti.
 
 ---
+
+# [Funzionigramma](../docs\UI\Funzionigramma/)
+# [Mockup](../docs\UI\mockup/)
+# [ProgettazioneMockup](../docs\UI\ProgettazioneMockup_SitoApicoltore/)
