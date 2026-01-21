@@ -1,3 +1,4 @@
+
 # 📄 Specifica Tecnica e Interfaccia Utente - Gestionale Apiario
 
 **Progetto:** Gestionale Monitoraggio Arnie
@@ -12,13 +13,13 @@ L'applicazione prevede due flussi di navigazione distinti, entrambi protetti tra
 
 ### Flusso Apicoltore (User)
 * `/login` : Pagina di accesso principale.
-* `/` o `/dashboard` : Home page con lista apiari e stato salute generale.
+* `/home` : Home page con lista apiari e stato salute generale.
 * `/apiario/:id` : Dettaglio dello specifico apiario (Griglia Arnie).
 * `/arnia/:id` : Scheda tecnica della singola arnia (Grafici e Sensori).
 
 ### Flusso Amministratore (Admin)
-* `/admin/login` : Pagina di accesso riservata agli amministratori.
-* `/admin/dashboard` : Pannello di gestione utenti, chiavi e configurazioni.
+* `/admin` : Pagina di accesso riservata agli amministratori.
+* `/dashboard` : Pannello di gestione utenti, chiavi e configurazioni.
 
 ---
 
@@ -38,7 +39,7 @@ Il sistema non utilizza username/password, ma chiavi univoche.
 * **UI Elements:**
     * Campo Input: "Inserisci API Key Amministratore".
     * Bottone: "Entra nel Pannello Admin".
-* **Comportamento:** Validazione chiave admin -> Redirect a `/admin/dashboard`.
+* **Comportamento:** Validazione chiave admin -> Redirect a `/dashboard`.
 
 ### B. Home Dashboard (Vista Apicoltore)
 Il centro operativo per l'utente.
