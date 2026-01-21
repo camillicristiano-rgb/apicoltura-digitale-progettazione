@@ -80,6 +80,6 @@ Interfaccia di gestione (Admin Dashboard).
 
 ---
 
-# [Funzionigramma](docs/UI/Funzionigramma.pdf)
-# [Mockup](docs/UI/mockup.pdf)
-# [ProgettazioneMockup](docs/UI/ProgettazioneMockup_SitoApicoltore.pdf)
+# [Funzionigramma](../docs/UI/Funzionigramma.pdf)
+# [Mockup](../docs/UI/mockup.pdf)
+# [ProgettazioneMockup](../docs/UI/ProgettazioneMockup_SitoApicoltore.pdf)
