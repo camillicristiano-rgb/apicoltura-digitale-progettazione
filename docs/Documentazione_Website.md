@@ -1,85 +1,743 @@
+# Specifica Tecnica Interfacce - Gestionale Apiario
 
-# 📄 Specifica Tecnica e Interfaccia Utente - Gestionale Apiario
-
-**Progetto:** Gestionale Monitoraggio Arnie
 **Versione:** 1.0
-**Tech Stack:** React (Frontend)
+**Ambito:** Web Application / Frontend
+**Target:** Apicoltori, Manutentori, Sviluppatori
 
 ---
 
-## 1. Mappa di Navigazione (Routing)
-
-L'applicazione prevede due flussi di navigazione distinti, entrambi protetti tramite autenticazione via API Key.
-
-### Flusso Apicoltore (User)
-* `/login` : Pagina di accesso principale.
-* `/home` : Home page con lista apiari e stato salute generale.
-* `/apiario/:id` : Dettaglio dello specifico apiario (Griglia Arnie).
-* `/arnia/:id` : Scheda tecnica della singola arnia (Grafici e Sensori).
-
-### Flusso Amministratore (Admin)
-* `/admin` : Pagina di accesso riservata agli amministratori.
-* `/dashboard` : Pannello di gestione utenti, chiavi e configurazioni.
+## 1. Introduzione
+L'interfaccia utente è il punto di contatto finale che trasforma i dati grezzi dei sensori in informazioni decisionali, permettendo all'apicoltore di intervenire tempestivamente in caso di sciamatura, fame, malattie o eventi climatici avversi.
 
 ---
 
-## 2. Dettaglio Interfacce Utente (UI)
+## 2. Architettura Frontend
+L'applicazione è una **Single Page Application (SPA)** reattiva. L'architettura è modulare e progettata per visualizzare i dati provenienti da un server REST centrale.
 
-### A. Login (Accesso Unificato via API Key)
-Il sistema non utilizza username/password, ma chiavi univoche.
-
-**1. Login Apicoltore**
-* **UI Elements:**
-    * Campo Input: "Inserisci la tua API Key".
-    * Bottone: "Login".
-    * Footer: Link "Sei un admin?" (apre l'interfaccia di login per gli admin).
-* **Comportamento:** Validazione chiave utente -> Redirect a `/home`.
-
-**2. Login Admin**
-* **UI Elements:**
-    * Campo Input: "Inserisci API Key Amministratore".
-    * Bottone: "Login".
-* **Comportamento:** Validazione chiave admin -> Redirect a `/dashboard`.
-
-### B. Home (Vista Apicoltore)
-Il centro operativo per l'utente (Dashboard Apicoltore).
-
-* **Header:** Logo, Icona Notifiche (Alert), Tasto Logout.
-* **Stato Generale:** Box riassuntivo (es. "Tutto OK" o "2 Arnie critiche").
-* **Lista Apiari:** Elenco card/lista degli apiari assegnati.
-* **Azioni:** Collegamenti rapidi alle ispezioni o manutenzioni.
-
-### C. Apiario
-Vista contenitore delle arnie.
-
-* **Info Testata:** Nome Apiario, Posizione/Mappa.
-* **Griglia Arnie:** Visualizzazione delle singole unità.
-* **Stato Visivo:** Ogni card arnia possiede un indicatore (es. bordo colorato o icona semaforo) che riflette lo stato di salute basato sui sensori.
-
-### D. Dettaglio Arnia (Scheda Sensori)
-Pagina di analisi profonda di ciascun arnia.
-
-* **Info:** Identificativo Arnia e coordinate.
-* **Sensori Real-time:**
-    * **Temperatura:** Gradi centigradi interni.
-    * **Peso:** Kg attuali (stima scorte/miele).
-    * **Umidità:** Percentuale relativa.
-    * **Livello Acqua:** Livello acqua.
-    * **Rumori:** Ambiente tranquillo/non tranquillo.
-* **Grafici:** Sezione per visualizzare l'andamento storico (ultime 24h / 7gg) dei tre parametri sopra citati.
-* **Note:** Area testo per annotazioni o storico interventi manuali.
-
-### E. Pannello Admin
-Interfaccia di gestione (Admin Dashboard).
-
-* **Gestione Utenti:** Tabella con Nome, Ruolo, API Key assegnata.
-* **Azioni:**
-    * "Genera Nuova Key": Crea una stringa univoca per un nuovo utente.
-    * "Revoca Key": Disabilita l'accesso a un utente.
-* **Configurazione Apiari:** CRUD (Create, Read, Update, Delete) degli apiari e assegnazione agli utenti.
+* **Ruolo dell'Interfaccia:** Presentazione dati e Configurazione.
+* **Sicurezza:** L'accesso è protetto e subordinato al possesso di una API Key valida.
+* **Reattività:** Il sistema fornisce feedback immediato sullo stato di salute della colonia (es. *Normalità, Allarme, Manutenzione*).
+* **RestDB:** https://databaseclone-6d99.restdb.io/rest
 
 ---
 
+## 3. Mappa di Navigazione
+Il percorso utente è strutturato gerarchicamente per gestire la complessità dei dati (da molti apiari a un singolo sensore).
+
+1.  **Login** (`/login`): Autenticazione univoca.
+2.  **Dashboard Generale** (`/home`): Vista d'insieme della flotta e notifiche urgenti.
+3.  **Vista Apiario** (`/apiario/:id`): Filtro geografico (gruppo di arnie).
+4.  **Dettaglio Arnia** (`/arnia/:id`): Analisi profonda (Sensori, Grafici, Camera).
+
+```import Login from "./pages/login.jsx";
+import Home from "./pages/home.jsx";
+import ApiarioPage from "./pages/apiario.jsx";
+import ArniaPage from "./pages/arnia.jsx";
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Navigate to="/login" replace />, // Componente che reindirizza alla pagina di login
+  },
+  {
+    path: '/login',
+    element: <Login />,
+  },
+  {
+    path: '/home',
+    element: <Home />,
+  },
+  {
+    path: '/apiario/:id',
+    element: <ApiarioPage />,
+  },
+  {
+    path: '/arnia/:id',
+    element: <ArniaPage />,
+  }
+]);
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <RouterProvider router={router} />
+  </React.StrictMode>
+);
+```
+
+---
+
+## 4. Descrizione Dettagliata delle Interfacce
+
+### A. Portale di Accesso (Login)
+* **Percorso:** `/login`
+* **Target:** Apicoltori (produzione) e Sviluppatori (debug).
+* **Funzionalità:** Inserimento API Key.
+* **Logica:** Verifica immediata della validità della chiave.
+
+#### Specifiche Funzionali:
+
+* **F 1.0 (Input):** Textbox per l'inserimento della API_KEY.
+
+* **F 1.1 (Azione):** Button "Accedi" per effettuare il login.
+
+#### Logica Codice:
+Il componente gestisce lo stato dell'input e, al click, verifica la chiave chiamando _ping su RestDB.
+
+```export default function Login() {
+  const [apik, setApik] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  async function handleLogin() {
+    setError("");
+
+    // 1. Controllo Minuscole
+    if (apik !== apik.toLowerCase()) {
+      setError("Errore: la chiave deve essere tutta in minuscolo.");
+      return;
+    }
+
+    // 2. Controllo Lunghezza (le API Key di restdb.io sono solitamente di 24 caratteri)
+    if (apik.length < 20) { 
+      setError("Errore: la chiave è troppo corta.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // 3. Controllo connessione reale verso RestDB
+      // Sostituisci 'nome-database' con il nome del tuo DB su restdb.io
+      // Usiamo una collezione esistente o semplicemente una chiamata di test
+      const response = await fetch("https://databaseclone-6d99.restdb.io/rest/_ping", {
+        method: "GET",
+        headers: {
+          "x-apikey": apik, // Header specifico richiesto da restdb.io
+          "Content-Type": "application/json",
+          "cache-control": "no-cache"
+        }
+      });
+
+      if (response.ok) {
+        // Se il server risponde 200 OK
+        localStorage.setItem("apik", apik);
+        window.location.href = "/home";
+      } else {
+        // Se la chiave è errata (es. errore 401 Unauthorized)
+        setError("Chiave API non valida per il DB.");
+      }
+    } catch (err) {
+      // Errore di rete o URL errato
+      setError("Impossibile connettersi. Controlla la key o la connessione.");
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+  ```
+
+### B. Dashboard Operativa (Home)
+* **Percorso:** `/home`
+* **Scopo:** Fornisce la "Situational Awareness" immediata. L'utente deve capire a colpo d'occhio se ci sono emergenze.
+
+**Elementi Chiave:**
+* **Stato Complessivo:** Un indicatore semaforico globale.
+    > *Logica:* Se anche solo un'arnia presenta parametri critici (es. Peso < soglia o Umidità > 90%), lo stato cambia.
+* **Mappa Apiari:** Mappa che illustra la posizione di ogni apiario.
+* **Lista Apiari:** Card riassuntive per ogni postazione.
+* **Log Notifiche:** Visualizzazione degli eventi generati dalla logica di backend (es. *"Batteria scarica"*, *"Inizio sciamatura rilevato"*).
+
+#### Specifiche Funzionali:
+
+* **F 3.0 (Navigazione):** Button/Link per ricaricare o tornare alla Home.
+
+* **F 3.1 (Mappa):** Visualizzazione geografica degli apiari (o lista rapida cliccabile).
+
+* **3.2 (Notifiche):** Area dedicata alle notifiche generali di sistema.
+
+* **3.3 (Selezione):** Interazione che porta alla pagina dell'apiario selezionato.
+
+* **3.4 (Lista):** Elementi (bottoni) per scorrere/visualizzare tutti gli apiari posseduti.
+
+* **3.5 (Logout):** Button che riporta alla schermata di login, cancellando la sessione.
+
+#### Logica Codice:
+Caricamento parallelo di Apiari e Notifiche per massimizzare la velocità.
+
+```const RESTDB_BASE = "https://databaseclone-6d99.restdb.io/rest";
+
+const COL_APIARI = "apiari";
+const COL_NOTIFICHE = "notifiche";
+
+export default function Home() {
+  const [apik, setApik] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const [apiari, setApiari] = useState([]);
+  const [notifiche, setNotifiche] = useState([]);
+
+  useEffect(() => {
+    const k = localStorage.getItem("apik");
+    if (!k) {
+      window.location.href = "/";
+      return;
+    }
+    setApik(k);
+  }, []);
+
+  useEffect(() => {
+    async function loadAll() {
+      if (!apik) return;
+
+      setIsLoading(true);
+      setError("");
+
+      try {
+        const [apiariRes, notifRes] = await Promise.all([
+          fetch(`${RESTDB_BASE}/${COL_APIARI}`, {
+            method: "GET",
+            headers: {
+              "x-apikey": apik,
+              "Content-Type": "application/json",
+              "cache-control": "no-cache",
+            },
+          }),
+          fetch(`${RESTDB_BASE}/${COL_NOTIFICHE}?sort=-_created`, {
+            method: "GET",
+            headers: {
+              "x-apikey": apik,
+              "Content-Type": "application/json",
+              "cache-control": "no-cache",
+            },
+          }),
+        ]);
+
+        if (!apiariRes.ok) {
+          throw new Error(
+            "Errore nel caricamento apiari (controlla API key/collezione)."
+          );
+        }
+        if (!notifRes.ok) {
+          throw new Error(
+            "Errore nel caricamento notifiche (controlla API key/collezione)."
+          );
+        }
+
+        const apiariData = await apiariRes.json();
+        const notifData = await notifRes.json();
+
+        setApiari(Array.isArray(apiariData) ? apiariData : []);
+        setNotifiche(Array.isArray(notifData) ? notifData : []);
+      } catch (e) {
+        console.error(e);
+        setError(e?.message || "Errore generico di caricamento.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadAll();
+  }, [apik]);
+
+  // F3.0: torna alla home
+  function goHome() {
+    window.location.href = "/home";
+  }
+
+  // F3.5: logout
+  function logout() {
+    localStorage.removeItem("apik");
+    window.location.href = "/";
+  }
+
+  // Porta alla pagina di uno specifico apiario
+  function goToApiario(apiarioId) {
+    window.location.href = `/apiario/${apiarioId}`;
+  }
+  ```
+
+### C. Vista Apiario
+* **Percorso:** `/apiario/:id`
+* **Scopo:** Permette di confrontare le arnie vicine tra loro (fondamentale per capire se un'anomalia è singola o ambientale).
+
+**Elementi Chiave:**
+* **Griglia Arnie:** Ogni arnia è un blocco che mostra i parametri vitali (Peso, Temp, Stato).
+* **Evidenziazione Anomalie:** Le arnie che richiedono intervento (es. sensore disconnesso o valori fuori soglia) sono evidenziate visivamente (bordo rosso/arancione).
+
+#### Specifiche Funzionali:
+
+* **F 4.0 (Home):** Button per tornare alla dashboard principale.
+
+* **F 4.1 (Meteo):** Spazio riservato alle previsioni meteo locali.
+
+* **F 4.2 (Annotazioni):** Area di testo o log per inserire/leggere note sull'apiario.
+
+* **F 4.3 (Selezione Arnia):** Button/Card per accedere alla pagina dell'arnia specifica.
+
+* **F 4.4 (Lista Arnie):** Griglia o lista scorrevole di tutte le arnie dell'apiario.
+
+* **F 4.5 (Logout):** Button per tornare al login.
+
+#### Logica Codice:
+Utilizza una query NoSQL robusta ($or) per trovare le arnie associate all'ID dell'apiario, gestendo sia formati numerici che stringa.
+
+```const RESTDB_BASE = "https://databaseclone-6d99.restdb.io/rest";
+
+// METTI QUI I NOMI ESATTI delle collezioni come appaiono su RestDB
+const COL_APIARIO = "apiari";
+const COL_ARNIA = "arnie";      // <-- PROVA "arnie" (molto probabile)
+const COL_NOTIFICA = "notifiche";
+
+export default function ApiarioPage() {
+  const { id } = useParams(); // id = api_id passato nella route
+
+  const [apik, setApik] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const [apiario, setApiario] = useState(null);
+
+  const [arnie, setArnie] = useState([]);
+  const [selectedArniaId, setSelectedArniaId] = useState(null);
+
+  const [notifiche, setNotifiche] = useState([]);
+
+  const selectedArnia = useMemo(() => {
+    return arnie.find((a) => String(a.arn_id) === String(selectedArniaId)) || null;
+  }, [arnie, selectedArniaId]);
+
+  useEffect(() => {
+    const k = localStorage.getItem("apik");
+    if (!k) {
+      window.location.href = "/";
+      return;
+    }
+    setApik(k);
+  }, []);
+
+  useEffect(() => {
+    async function loadAll() {
+      if (!apik || !id) return;
+
+      setIsLoading(true);
+      setError("");
+
+      try {
+        // 1) APIARIO (prendo il primo con api_id = id)
+        const apiarioRes = await fetch(
+          `${RESTDB_BASE}/${COL_APIARIO}?q=${encodeURIComponent(
+            JSON.stringify({ api_id: Number(id) })
+          )}`,
+          {
+            method: "GET",
+            headers: {
+              "x-apikey": apik,
+              "Content-Type": "application/json",
+              "cache-control": "no-cache",
+            },
+          }
+        );
+
+        if (!apiarioRes.ok) throw new Error("Errore caricamento apiario.");
+        const apiarioArr = await apiarioRes.json();
+        setApiario(Array.isArray(apiarioArr) ? apiarioArr[0] : null);
+
+        // 2) ARNIE filtrate per arn_api_id
+        // query robusta: prova sia NUMERO che STRINGA
+        const qArnieObj = {
+          $or: [{ arn_api_id: Number(id) }, { arn_api_id: String(id) }],
+        };
+
+        const arnieUrl = `${RESTDB_BASE}/${COL_ARNIA}?q=${encodeURIComponent(
+          JSON.stringify(qArnieObj)
+        )}`;
+
+        const arnieRes = await fetch(arnieUrl, {
+          method: "GET",
+          headers: {
+            "x-apikey": apik,
+            "Content-Type": "application/json",
+            "cache-control": "no-cache",
+          },
+        });
+
+        if (!arnieRes.ok) {
+          const txt = await arnieRes.text().catch(() => "");
+          throw new Error(
+            `Errore caricamento arnie. Status=${arnieRes.status}. ${txt}`
+          );
+        }
+
+        const arnieData = await arnieRes.json();
+        const arnieArr = Array.isArray(arnieData) ? arnieData : [];
+        setArnie(arnieArr);
+
+        // selezione di default
+        if (arnieArr.length && !selectedArniaId) {
+          setSelectedArniaId(arnieArr[0].arn_id ?? arnieArr[0]._id);
+        }
+
+        // 3) NOTIFICHE (come avevi)
+        const notifRes = await fetch(`${RESTDB_BASE}/${COL_NOTIFICA}?sort=-_created`, {
+          method: "GET",
+          headers: {
+            "x-apikey": apik,
+            "Content-Type": "application/json",
+            "cache-control": "no-cache",
+          },
+        });
+        if (notifRes.ok) {
+          const notifData = await notifRes.json();
+          setNotifiche(Array.isArray(notifData) ? notifData : []);
+        }
+      } catch (e) {
+        console.error(e);
+        setError(e?.message || "Errore generico.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apik, id]);
+
+  function goHome() {
+    window.location.href = "/home";
+  }
+
+  function logout() {
+    localStorage.removeItem("apik");
+    window.location.href = "/";
+  }
+
+  function goToArnia(arnId) {
+    window.location.href = `/arnia/${arnId}`;
+  }
+
+  function nextArnia() {
+    if (!arnie.length) return;
+    const idx = arnie.findIndex(
+      (a) => String(a.arn_id) === String(selectedArniaId)
+    );
+    const nextIdx = idx === -1 ? 0 : (idx + 1) % arnie.length;
+    setSelectedArniaId(arnie[nextIdx].arn_id);
+  }
+```
+
+### D. Dettaglio Arnia (Pannello di Controllo)
+* **Percorso:** `/arnia/:id`
+* **Scopo:** Interfaccia principale dove convergono i dati di tutti i sensori.
+
+#### Specifiche Funzionali (Stato OK / Allerta):
+
+* **F 5.0 (Home):** Torna alla dashboard.
+
+* **F 5.1 / F 6.0 (Stato):** Visualizzatore visivo dello stato (OK = Verde, ALLARME = Rosso).
+
+* **F 5.2 (Back):** Button per tornare alla vista dell'apiario di appartenenza.
+
+* **F 5.3 (Notifiche):** ScrollBar per le notifiche specifiche di questa arnia.
+
+* **F 5.4 (Valori):** Spazio per i dati real-time: Peso, Temperatura, Umidità.
+
+* **F 5.5 (Grafici):** Area dedicata ai grafici storici (trend).
+
+* **F 5.6 / 5.7 (Soglie):** Pulsanti + e - per tarare le soglie di allarme localmente.
+
+#### 1. Pannello Sensori (Dati Real-time)
+L'interfaccia traduce i dati numerici in stati comprensibili:
+
+| Sensore | Parametro | Logica UI & Casi d'Uso |
+| :--- | :--- | :--- |
+| **Temperatura** (DS18B20) | Valore in °C | • **34-36°C:** Icona Verde (Covata OK)<br>• **< 10°C:** Allarme "Rischio Collasso/Fame"<br>• **> 37°C:** Allarme "Possibile Sciamatura"<br>• **= Temp Esterna:** Allarme Critico "Perdita Colonia" |
+| **Umidità** (SHT21/HTU21) | Percentuale % | • **55-70%:** Stato "Ottimale"<br>• **< 60%:** Notifica "Maturazione Miele"<br>• **> 90%:** Allarme "Rischio Condensa/Malattie" |
+| **Peso** (HX711) | Totale in Kg | • **Grafico Trend:** Variazione produzione vs consumo.<br>• **Logica:** Evidenzia cali improvvisi (furto/sciamatura) o lenti (fame invernale). |
+
+#### Logica di Visualizzazione Dati:
+Il codice mappa dinamicamente i sensori installati ai widget dell'interfaccia.
+
+```const RESTDB_BASE = "https://databaseclone-6d99.restdb.io/rest";
+
+// Metti i nomi ESATTI delle collezioni su RestDB
+const COL_ARNIA = "arnie";
+const COL_SENSORE = "sensori";
+const COL_TIPO = "tipi";
+const COL_RILEVAZIONE = "rilevazioni";
+const COL_NOTIFICA = "notifiche";
+
+export default function ArniaPage() {
+  const { id } = useParams(); // /arnia/:id  (qui id = arn_id)
+
+  const [apik, setApik] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Dati arnia
+  const [arnia, setArnia] = useState(null);
+
+  // Notifiche (specifiche arnia) -> se nel DB hai not_arn_id, filtriamo. Altrimenti mostriamo tutto.
+  const [notifiche, setNotifiche] = useState([]);
+
+  // Sensori + tipi + ultime rilevazioni
+  const [sensori, setSensori] = useState([]);
+  const [tipi, setTipi] = useState([]);
+  const [rilevazioni, setRilevazioni] = useState([]); // ultime N
+
+  // Soglie (UI locale per + e -)
+  const [soglie, setSoglie] = useState({
+    peso: 0,
+    temperatura: 0,
+    umidita: 0,
+  });
+
+  useEffect(() => {
+    const k = localStorage.getItem("apik");
+    if (!k) {
+      window.location.href = "/";
+      return;
+    }
+    setApik(k);
+  }, []);
+
+  useEffect(() => {
+    async function loadAll() {
+      if (!apik || !id) return;
+      setIsLoading(true);
+      setError("");
+
+      try {
+        // 1) ARNIA singola (per arn_id)
+        const qArnia = encodeURIComponent(JSON.stringify({ arn_id: Number(id) }));
+        const arniaRes = await fetch(`${RESTDB_BASE}/${COL_ARNIA}?q=${qArnia}`, {
+          method: "GET",
+          headers: {
+            "x-apikey": apik,
+            "Content-Type": "application/json",
+            "cache-control": "no-cache",
+          },
+        });
+
+        if (!arniaRes.ok) throw new Error("Errore caricamento arnia.");
+        const arniaArr = await arniaRes.json();
+        const arniaObj = Array.isArray(arniaArr) ? arniaArr[0] : null;
+        if (!arniaObj) throw new Error("Arnia non trovata (arn_id).");
+        setArnia(arniaObj);
+
+        // 2) TIPI (per mappare tip_id -> descrizione)
+        const tipiRes = await fetch(`${RESTDB_BASE}/${COL_TIPO}`, {
+          method: "GET",
+          headers: {
+            "x-apikey": apik,
+            "Content-Type": "application/json",
+            "cache-control": "no-cache",
+          },
+        });
+        const tipiData = tipiRes.ok ? await tipiRes.json() : [];
+        setTipi(Array.isArray(tipiData) ? tipiData : []);
+
+        // 3) SENSORI di questa arnia (sen_arn_id)
+        const qSensori = encodeURIComponent(
+          JSON.stringify({
+            $or: [{ sen_arn_id: Number(id) }, { sen_arn_id: String(id) }],
+          })
+        );
+        const sensRes = await fetch(`${RESTDB_BASE}/${COL_SENSORE}?q=${qSensori}`, {
+          method: "GET",
+          headers: {
+            "x-apikey": apik,
+            "Content-Type": "application/json",
+            "cache-control": "no-cache",
+          },
+        });
+        const sensData = sensRes.ok ? await sensRes.json() : [];
+        const sensArr = Array.isArray(sensData) ? sensData : [];
+        setSensori(sensArr);
+
+        // 4) RILEVAZIONI: prendo le ultime N (globali) e poi filtro per i sensori dell'arnia
+        // (Se vuoi, si può fare una query più sofisticata, ma così è robusto e semplice)
+        const rilRes = await fetch(`${RESTDB_BASE}/${COL_RILEVAZIONE}?sort=-ril_dataOra&max=200`, {
+          method: "GET",
+          headers: {
+            "x-apikey": apik,
+            "Content-Type": "application/json",
+            "cache-control": "no-cache",
+          },
+        });
+        const rilData = rilRes.ok ? await rilRes.json() : [];
+        const rilArr = Array.isArray(rilData) ? rilData : [];
+        setRilevazioni(rilArr);
+
+        // 5) NOTIFICHE: se hai un campo not_arn_id, filtriamo
+        // Se non ce l'hai (come nel tuo ER iniziale), le mostriamo tutte
+        // Provo prima a filtrare, se torna vuoto, carico tutte.
+        const qNotif = encodeURIComponent(
+          JSON.stringify({
+            $or: [{ not_arn_id: Number(id) }, { not_arn_id: String(id) }],
+          })
+        );
+
+        const notifTry = await fetch(`${RESTDB_BASE}/${COL_NOTIFICA}?q=${qNotif}&sort=-_created`, {
+          method: "GET",
+          headers: {
+            "x-apikey": apik,
+            "Content-Type": "application/json",
+            "cache-control": "no-cache",
+          },
+        });
+
+        if (notifTry.ok) {
+          const dataTry = await notifTry.json();
+          const arrTry = Array.isArray(dataTry) ? dataTry : [];
+          if (arrTry.length) {
+            setNotifiche(arrTry);
+          } else {
+            const notifAll = await fetch(`${RESTDB_BASE}/${COL_NOTIFICA}?sort=-_created`, {
+              method: "GET",
+              headers: {
+                "x-apikey": apik,
+                "Content-Type": "application/json",
+                "cache-control": "no-cache",
+              },
+            });
+            const allData = notifAll.ok ? await notifAll.json() : [];
+            setNotifiche(Array.isArray(allData) ? allData : []);
+          }
+        } else {
+          const notifAll = await fetch(`${RESTDB_BASE}/${COL_NOTIFICA}?sort=-_created`, {
+            method: "GET",
+            headers: {
+              "x-apikey": apik,
+              "Content-Type": "application/json",
+              "cache-control": "no-cache",
+            },
+          });
+          const allData = notifAll.ok ? await notifAll.json() : [];
+          setNotifiche(Array.isArray(allData) ? allData : []);
+        }
+      } catch (e) {
+        console.error(e);
+        setError(e?.message || "Errore generico.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadAll();
+  }, [apik, id]);
+
+  // ---- Navigazione (F5.0 e F5.2) ----
+  function goHome() {
+    window.location.href = "/home"; // F5.0
+  }
+
+  function goBackToApiario() {
+    const apiId = arnia?.arn_api_id;
+    if (!apiId) return;
+    window.location.href = `/apiario/${apiId}`; // F5.2
+  }
+
+  function logout() {
+    localStorage.removeItem("apik");
+    window.location.href = "/";
+  }
+
+  // ---- Stato arnia (F5.1) ----
+  // Semplice: se arnia.arn_piena true => "OK" (puoi cambiare logica)
+  const stato = useMemo(() => {
+    if (!arnia) return "—";
+    return arnia.arn_piena ? "OK" : "NON OK";
+  }, [arnia]);
+
+  // ---- Helpers: valore corrente per Peso/Temp/Umidità (F5.4) ----
+  // Mappo tipo -> sensore -> ultima rilevazione
+  const tipoById = useMemo(() => {
+    const m = new Map();
+    for (const t of tipi) m.set(String(t.tip_id), t);
+    return m;
+  }, [tipi]);
+
+  const sensoriConTipo = useMemo(() => {
+    return sensori.map((s) => {
+      const t = tipoById.get(String(s.sen_tip_id));
+      return { ...s, _tipo: t?.tip_descrizione || t?.descrizione || t?.tip_nome || "" };
+    });
+  }, [sensori, tipoById]);
+
+  const latestBySenId = useMemo(() => {
+    const m = new Map();
+    // rilevazioni già ordinate desc (sort=-ril_dataOra), prendo la prima per sensore
+    for (const r of rilevazioni) {
+      const sid = String(r.ril_sen_id);
+      if (!m.has(sid)) m.set(sid, r);
+    }
+    return m;
+  }, [rilevazioni]);
+
+  function getLatestValueForType(typeNameIncludes) {
+    // typeNameIncludes: "peso" / "temperatura" / "umid"
+    const target = typeNameIncludes.toLowerCase();
+    const sens = sensoriConTipo.find((s) =>
+      String(s._tipo || "").toLowerCase().includes(target)
+    );
+    if (!sens) return null;
+    const latest = latestBySenId.get(String(sens.sen_id));
+    if (!latest) return null;
+    return latest.ril_dato;
+  }
+
+  const peso = getLatestValueForType("peso");
+  const temperatura = getLatestValueForType("temperatura");
+  const umidita = getLatestValueForType("umid");
+
+  // ---- Soglie (F5.6 / F5.7) ----
+  function incSoglia(key) {
+    setSoglie((prev) => ({ ...prev, [key]: (prev[key] ?? 0) + 1 }));
+  }
+  function decSoglia(key) {
+    setSoglie((prev) => ({ ...prev, [key]: (prev[key] ?? 0) - 1 }));
+  }
+
+  // ---- Grafici (F5.5) ----
+  // Per ora: lista delle ultime rilevazioni della singola arnia (testuale).
+  // Puoi sostituire con un grafico vero (Chart.js, Recharts, ecc.)
+  const rilevazioniArnia = useMemo(() => {
+    const sensIds = new Set(sensori.map((s) => String(s.sen_id)));
+    return rilevazioni.filter((r) => sensIds.has(String(r.ril_sen_id))).slice(0, 30);
+  }, [sensori, rilevazioni]);
+  ```
+
+#### 2. Modulo Camera (Visione Remota)
+Interfaccia di controllo per l'ESP32-CAM.
+* **Pulsante "Richiedi Foto":** Invia un comando al server per scattare una foto realtime dell'ingresso.
+* **Galleria Storica:** Visualizzazione immagini archiviate per monitorare attività di volo o intrusioni.
+
+#### 3. Configurazione Soglie (Attuatori Logici)
+Permette la modifica dei parametri di allarme senza riprogrammare il firmware.
+* Controlli `+ / -` per le soglie di **Peso*, **Temperatura** e **Umidità**.
+
+---
+
+## 5. Requisiti Non Funzionali dell'Interfaccia
+* **Leggibilità:** Alto contrasto per visibilità all'aperto.
+* **Efficienza Dati:** Richiesta stretta dei soli dati necessari per minimizzare il consumo su connessioni mobili rurali instabili.
+* **Resilienza:** Se un sensore non invia dati (es. guasto), l'interfaccia mostra *"Dato non disponibile"* o *"Manutenzione"* senza bloccare l'intera pagina.
+
+---
+
+## 6. Riferimenti Grafici
+La struttura visiva fa riferimento alla documentazione di design allegata:
 # [Funzionigramma](../docs/UI/Funzionigramma.pdf)
 # [Mockup](../docs/UI/mockup.pdf)
 # [ProgettazioneMockup](../docs/UI/ProgettazioneMockup_SitoApicoltore.pdf)
+
+## 7. Tecnologie Utilizzate
+
+Di seguito i riferimenti alle principali tecnologie e librerie impiegate nello sviluppo del frontend:
+
+[React](https://react.dev/): Libreria JavaScript per la costruzione delle interfacce utente.
+[TailwindCSS](https://tailwindcss.com/): Framework CSS utility-first per uno sviluppo rapido.
+[Node.js](https://nodejs.org/): Runtime JavaScript utilizzato per l'ambiente di sviluppo e gestione pacchetti.
+[ShadCN/ui](https://ui.shadcn.com/): Collezione di componenti UI accessibili e personalizzabili.
+[Lucide React](https://lucide.dev/): Libreria di icone leggera e consistente.
