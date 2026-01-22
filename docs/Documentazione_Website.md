@@ -74,6 +74,12 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 * **Funzionalità:** Inserimento API Key.
 * **Logica:** Verifica immediata della validità della chiave.
 
+#### Specifiche Funzionali:
+
+* **F 1.0 (Input):** Textbox per l'inserimento della API_KEY.
+
+* **F 1.1 (Azione):** Button "Accedi" per effettuare il login.
+
 ```export default function Login() {
   const [apik, setApik] = useState("");
   const [error, setError] = useState("");
@@ -137,6 +143,20 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 * **Mappa Apiari:** Mappa che illustra la posizione di ogni apiario.
 * **Lista Apiari:** Card riassuntive per ogni postazione.
 * **Log Notifiche:** Visualizzazione degli eventi generati dalla logica di backend (es. *"Batteria scarica"*, *"Inizio sciamatura rilevato"*).
+
+#### Specifiche Funzionali:
+
+* **F 3.0 (Navigazione):** Button/Link per ricaricare o tornare alla Home.
+
+* **F 3.1 (Mappa):** Visualizzazione geografica degli apiari (o lista rapida cliccabile).
+
+* **3.2 (Notifiche):** Area dedicata alle notifiche generali di sistema.
+
+* **3.3 (Selezione):** Interazione che porta alla pagina dell'apiario selezionato.
+
+* **3.4 (Lista):** Elementi (bottoni) per scorrere/visualizzare tutti gli apiari posseduti.
+
+* **3.5 (Logout):** Button che riporta alla schermata di login, cancellando la sessione.
 
 ```const RESTDB_BASE = "https://databaseclone-6d99.restdb.io/rest";
 
@@ -238,6 +258,20 @@ export default function Home() {
 **Elementi Chiave:**
 * **Griglia Arnie:** Ogni arnia è un blocco che mostra i parametri vitali (Peso, Temp, Stato).
 * **Evidenziazione Anomalie:** Le arnie che richiedono intervento (es. sensore disconnesso o valori fuori soglia) sono evidenziate visivamente (bordo rosso/arancione).
+
+#### Specifiche Funzionali:
+
+* **F 4.0 (Home):** Button per tornare alla dashboard principale.
+
+* **F 4.1 (Meteo):** Spazio riservato alle previsioni meteo locali.
+
+* **F 4.2 (Annotazioni):** Area di testo o log per inserire/leggere note sull'apiario.
+
+* **F 4.3 (Selezione Arnia):** Button/Card per accedere alla pagina dell'arnia specifica.
+
+* **F 4.4 (Lista Arnie):** Griglia o lista scorrevole di tutte le arnie dell'apiario.
+
+* **F 4.5 (Logout):** Button per tornare al login.
 
 ```const RESTDB_BASE = "https://databaseclone-6d99.restdb.io/rest";
 
@@ -386,6 +420,22 @@ export default function ApiarioPage() {
 ### D. Dettaglio Arnia (Pannello di Controllo)
 * **Percorso:** `/arnia/:id`
 * **Scopo:** Interfaccia principale dove convergono i dati di tutti i sensori.
+
+#### Specifiche Funzionali (Stato OK / Allerta):
+
+* **F 5.0 (Home):** Torna alla dashboard.
+
+* **F 5.1 / F 6.0 (Stato):** Visualizzatore visivo dello stato (OK = Verde, ALLARME = Rosso).
+
+* **F 5.2 (Back):** Button per tornare alla vista dell'apiario di appartenenza.
+
+* **F 5.3 (Notifiche):** ScrollBar per le notifiche specifiche di questa arnia.
+
+* **F 5.4 (Valori):** Spazio per i dati real-time: Peso, Temperatura, Umidità.
+
+* **F 5.5 (Grafici):** Area dedicata ai grafici storici (trend).
+
+* **F 5.6 / 5.7 (Soglie):** Pulsanti + e - per tarare le soglie di allarme localmente.
 
 #### 1. Pannello Sensori (Dati Real-time)
 L'interfaccia traduce i dati numerici in stati comprensibili:
