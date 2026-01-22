@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
-const RESTDB_BASE = "https://databaseclone-6d99.restdb.io/rest";
+const RESTDB_BASE = "https://clone4-9a15.restdb.io/rest";
 
 // ⚠️ Metti i nomi ESATTI delle collezioni su RestDB
 const COL_ARNIA = "arnie";
@@ -11,29 +11,29 @@ const COL_RILEVAZIONE = "rilevazioni";
 const COL_NOTIFICA = "notifiche";
 
 export default function ArniaPage() {
-  const { id } = useParams(); // /arnia/:id  (qui id = arn_id)
+  const { id } = useParams(); // /arnia/:id (qui id = arn_id)
 
   const [apik, setApik] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Dati arnia
   const [arnia, setArnia] = useState(null);
 
-  // Notifiche (specifiche arnia) -> se nel DB hai not_arn_id, filtriamo. Altrimenti mostriamo tutto.
   const [notifiche, setNotifiche] = useState([]);
 
-  // Sensori + tipi + ultime rilevazioni
   const [sensori, setSensori] = useState([]);
   const [tipi, setTipi] = useState([]);
-  const [rilevazioni, setRilevazioni] = useState([]); // ultime N
+  const [rilevazioni, setRilevazioni] = useState([]);
 
-  // Soglie (UI locale per + e -)
   const [soglie, setSoglie] = useState({
     peso: 0,
     temperatura: 0,
     umidita: 0,
   });
+
+  // ✅ AGGIUNTA: draft min/max per modifiche
+  const [draftSoglie, setDraftSoglie] = useState({}); // key: sensoriarnia._id -> {min,max}
+  const [savingId, setSavingId] = useState(null);
 
   useEffect(() => {
     const k = localStorage.getItem("apik");
@@ -47,6 +47,7 @@ export default function ArniaPage() {
   useEffect(() => {
     async function loadAll() {
       if (!apik || !id) return;
+
       setIsLoading(true);
       setError("");
 
@@ -62,13 +63,17 @@ export default function ArniaPage() {
           },
         });
 
-        if (!arniaRes.ok) throw new Error("Errore caricamento arnia.");
+        if (!arniaRes.ok) {
+          const txt = await arniaRes.text().catch(() => "");
+          throw new Error(`Errore caricamento arnia. Status=${arniaRes.status}. ${txt}`);
+        }
+
         const arniaArr = await arniaRes.json();
         const arniaObj = Array.isArray(arniaArr) ? arniaArr[0] : null;
         if (!arniaObj) throw new Error("Arnia non trovata (arn_id).");
         setArnia(arniaObj);
 
-        // 2) TIPI (per mappare tip_id -> descrizione)
+        // 2) TIPI
         const tipiRes = await fetch(`${RESTDB_BASE}/${COL_TIPO}`, {
           method: "GET",
           headers: {
@@ -80,13 +85,8 @@ export default function ArniaPage() {
         const tipiData = tipiRes.ok ? await tipiRes.json() : [];
         setTipi(Array.isArray(tipiData) ? tipiData : []);
 
-        // 3) SENSORI di questa arnia (sen_arn_id)
-        const qSensori = encodeURIComponent(
-          JSON.stringify({
-            $or: [{ sen_arn_id: Number(id) }, { sen_arn_id: String(id) }],
-          })
-        );
-        const sensRes = await fetch(`${RESTDB_BASE}/${COL_SENSORE}?q=${qSensori}`, {
+        // 3) SENSORI (sensoriarnia) di questa arnia
+        const sensRes = await fetch(`${RESTDB_BASE}/sensoriarnia?q={"sea_arn_id":${id}}`, {
           method: "GET",
           headers: {
             "x-apikey": apik,
@@ -94,41 +94,123 @@ export default function ArniaPage() {
             "cache-control": "no-cache",
           },
         });
-        const sensData = sensRes.ok ? await sensRes.json() : [];
+
+        const sensData = await sensRes.json();
         const sensArr = Array.isArray(sensData) ? sensData : [];
+        const sensTypeId = sensArr.map((s) => s.sea_tip_id);
+
+        const sensStr = await fetch(
+          `${RESTDB_BASE}/tipirilevazione?q={"tip_id":{"$in":${JSON.stringify(
+            sensTypeId.concat(sensTypeId)
+          )}}}`,
+          {
+            method: "GET",
+            headers: {
+              "x-apikey": apik,
+              "Content-Type": "application/json",
+              "cache-control": "no-cache",
+            },
+          }
+        );
+
+        const tipiDataRil = await sensStr.json();
+
+        if (!sensRes.ok) {
+          const txt = await sensRes.text().catch(() => "");
+          throw new Error(`Errore caricamento sensori. Status=${sensRes.status}. ${txt}`);
+        }
+
         setSensori(sensArr);
 
-        // 4) RILEVAZIONI: prendo le ultime N (globali) e poi filtro per i sensori dell'arnia
-        // (Se vuoi, si può fare una query più sofisticata, ma così è robusto e semplice)
-        const rilRes = await fetch(`${RESTDB_BASE}/${COL_RILEVAZIONE}?sort=-ril_dataOra&max=200`, {
-          method: "GET",
-          headers: {
-            "x-apikey": apik,
-            "Content-Type": "application/json",
-            "cache-control": "no-cache",
-          },
+        // ✅ AGGIUNTA: inizializzo draftSoglie con sea_min/sea_max
+        setDraftSoglie((prev) => {
+          const next = { ...prev };
+          for (const s of sensArr) {
+            if (!s?._id) continue; // serve per PATCH
+            next[s._id] = {
+              min: s.sea_min ?? "",
+              max: s.sea_max ?? "",
+            };
+          }
+          return next;
         });
-        const rilData = rilRes.ok ? await rilRes.json() : [];
-        const rilArr = Array.isArray(rilData) ? rilData : [];
-        setRilevazioni(rilArr);
 
-        // 5) NOTIFICHE: se hai un campo not_arn_id, filtriamo
-        // Se non ce l'hai (come nel tuo ER iniziale), le mostriamo tutte
-        // Provo prima a filtrare, se torna vuoto, carico tutte.
+        const sensIdsNum = sensArr
+          .map((s) => {
+            const v = s.sea_id;
+            return isNaN(Number(v)) ? null : Number(v);
+          })
+          .filter((v) => v !== null);
+
+        // ✅ 4) RILEVAZIONI
+        console.log("Sensori caricati:", sensIdsNum);
+
+        if (sensIdsNum.length === 0) {
+          setRilevazioni([]);
+        } else {
+          const rilUrl = `${RESTDB_BASE}/${COL_RILEVAZIONE}?q={"ril_sea_id":{"$in":${JSON.stringify(
+            sensIdsNum.concat(sensIdsNum)
+          )}}}&h={"$orderby": {"ril_dataOra": -1}}`;
+
+          const rilRes = await fetch(rilUrl, {
+            method: "GET",
+            headers: {
+              "x-apikey": apik,
+              "Content-Type": "application/json",
+              "cache-control": "no-cache",
+            },
+          });
+
+          if (!rilRes.ok) {
+            const txt = await rilRes.text().catch(() => "");
+            throw new Error(
+              `Errore caricamento rilevazioni. Status=${rilRes.status}. ${txt}`
+            );
+          }
+
+          const rilData = await rilRes.json();
+          const rilArr = Array.isArray(rilData) ? rilData : [];
+
+          const sensori = sensArr.map((s) => {
+            const tipo = tipiDataRil.find(
+              (t) => String(t.tip_id) === String(s.sea_tip_id)
+            );
+            return {
+              sea_id: s.sea_id,
+              sea_tip_id: s.sea_tip_id,
+              tip_tipologia: tipo?.tip_tipologia || "",
+            };
+          });
+
+          const rilArrWithTipo = rilArr.map((r) => {
+            const sens = sensori.find((s) => String(s.sea_id) === String(r.ril_sea_id));
+            return {
+              ...r,
+              _tipo: sens ? sens.tip_tipologia : "",
+            };
+          });
+
+          setRilevazioni(rilArrWithTipo);
+        }
+
+        // 5) NOTIFICHE
         const qNotif = encodeURIComponent(
           JSON.stringify({
             $or: [{ not_arn_id: Number(id) }, { not_arn_id: String(id) }],
           })
         );
 
-        const notifTry = await fetch(`${RESTDB_BASE}/${COL_NOTIFICA}?q=${qNotif}&sort=-_created`, {
-          method: "GET",
-          headers: {
-            "x-apikey": apik,
-            "Content-Type": "application/json",
-            "cache-control": "no-cache",
-          },
-        });
+        const notifTry = await fetch(
+          `${RESTDB_BASE}/${COL_NOTIFICA}?q=${qNotif}&sort=-_created`,
+          {
+            method: "GET",
+            headers: {
+              "x-apikey": apik,
+              "Content-Type": "application/json",
+              "cache-control": "no-cache",
+            },
+          }
+        );
 
         if (notifTry.ok) {
           const dataTry = await notifTry.json();
@@ -170,15 +252,14 @@ export default function ArniaPage() {
     loadAll();
   }, [apik, id]);
 
-  // ---- Navigazione (F5.0 e F5.2) ----
   function goHome() {
-    window.location.href = "/home"; // F5.0
+    window.location.href = "/home";
   }
 
   function goBackToApiario() {
     const apiId = arnia?.arn_api_id;
     if (!apiId) return;
-    window.location.href = `/apiario/${apiId}`; // F5.2
+    window.location.href = `/apiario/${apiId}`;
   }
 
   function logout() {
@@ -186,75 +267,157 @@ export default function ArniaPage() {
     window.location.href = "/";
   }
 
-  // ---- Stato arnia (F5.1) ----
-  // Semplice: se arnia.arn_piena true => "OK" (puoi cambiare logica)
   const stato = useMemo(() => {
     if (!arnia) return "—";
     return arnia.arn_piena ? "OK" : "NON OK";
   }, [arnia]);
 
-  // ---- Helpers: valore corrente per Peso/Temp/Umidità (F5.4) ----
-  // Mappo tipo -> sensore -> ultima rilevazione
-  const tipoById = useMemo(() => {
-    const m = new Map();
-    for (const t of tipi) m.set(String(t.tip_id), t);
-    return m;
-  }, [tipi]);
+  // ---- ⬇⬇⬇  FUNZIONALITÀ MODIFICA SOGLIE (NUOVA)  ⬇⬇⬇ ----
 
-  const sensoriConTipo = useMemo(() => {
-    return sensori.map((s) => {
-      const t = tipoById.get(String(s.sen_tip_id));
-      return { ...s, _tipo: t?.tip_descrizione || t?.descrizione || t?.tip_nome || "" };
-    });
-  }, [sensori, tipoById]);
+  // Cerca sensore in sensoriarnia per tipologia (usando tipirilevazione tip_tipologia dentro rilevazioni)
+  function findSensoreByTipoIncludes(needle) {
+    const target = String(needle || "").toLowerCase();
+    // best effort: prova a dedurre dai tipi delle rilevazioni (sea_tip_id)
+    // se nel DB hai un campo "tip_tipologia" direttamente in sensoriarnia, puoi usare quello.
+    // Qui facciamo un match grezzo: scegliamo il sensore che ha un tipo che appare nelle rilevazioni arricchite.
+    const tipoSet = new Set(
+      rilevazioni
+        .map((r) => String(r._tipo || "").toLowerCase())
+        .filter(Boolean)
+    );
 
-  const latestBySenId = useMemo(() => {
-    const m = new Map();
-    // rilevazioni già ordinate desc (sort=-ril_dataOra), prendo la prima per sensore
-    for (const r of rilevazioni) {
-      const sid = String(r.ril_sen_id);
-      if (!m.has(sid)) m.set(sid, r);
+    // provo a trovare un tipo che contiene needle
+    const matchedTipo = Array.from(tipoSet).find((t) => t.includes(target));
+    if (!matchedTipo) return null;
+
+    // trovo un sensore che corrisponde a quel tipo tramite sea_tip_id:
+    // (non abbiamo in sensoriarr il nome tipo, quindi usiamo la prima rilevazione che ha quel tipo
+    // e risaliamo a ril_sea_id -> sea_id)
+    const r = rilevazioni.find((x) => String(x._tipo || "").toLowerCase().includes(target));
+    if (!r) return null;
+
+    const seaId = r.ril_sea_id;
+    return sensori.find((s) => String(s.sea_id) === String(seaId)) || null;
+  }
+
+  // Salva soglie su DB (PATCH, così non serve inviare sea_id ecc.)
+  async function saveSoglie(sensor) {
+    if (!sensor?._id) {
+      setError("Impossibile salvare: manca _id del record sensoriarnia.");
+      return;
     }
-    return m;
+
+    const draft = draftSoglie[sensor._id];
+    if (!draft) return;
+
+    const newMin = draft.min === "" ? null : Number(draft.min);
+    const newMax = draft.max === "" ? null : Number(draft.max);
+
+    // Validazione base
+    if (newMin !== null && Number.isNaN(newMin)) return;
+    if (newMax !== null && Number.isNaN(newMax)) return;
+    if (newMin !== null && newMax !== null && newMin > newMax) {
+      setError("Errore: min non può essere maggiore di max.");
+      return;
+    }
+
+    setSavingId(sensor._id);
+    setError("");
+
+    try {
+      const res = await fetch(`${RESTDB_BASE}/sensoriarnia/${sensor._id}`, {
+        method: "PATCH",
+        headers: {
+          "x-apikey": apik,
+          "Content-Type": "application/json",
+          "cache-control": "no-cache",
+        },
+        body: JSON.stringify({
+          sea_min: newMin,
+          sea_max: newMax,
+        }),
+      });
+
+      if (!res.ok) {
+        const txt = await res.text().catch(() => "");
+        throw new Error(`Errore salvataggio soglie. Status=${res.status}. ${txt}`);
+      }
+
+      // aggiorna lo state sensori
+      setSensori((prev) =>
+        prev.map((s) =>
+          s._id === sensor._id ? { ...s, sea_min: newMin, sea_max: newMax } : s
+        )
+      );
+    } catch (e) {
+      console.error(e);
+      setError(e?.message || "Errore salvataggio soglie.");
+    } finally {
+      setSavingId(null);
+    }
+  }
+
+  function renderSogliaRow(label, sensor) {
+    if (!sensor) return null;
+    const d = draftSoglie[sensor._id] || { min: "", max: "" };
+
+    return (
+      <div style={{ marginBottom: 14 }}>
+        <b>{label}</b>{" "}
+        <small style={{ opacity: 0.7 }}>
+          (DB: min={String(sensor.sea_min)} max={String(sensor.sea_max)})
+        </small>
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <label>
+            Min{" "}
+            <input
+              type="number"
+              value={d.min}
+              onChange={(e) =>
+                setDraftSoglie((p) => ({
+                  ...p,
+                  [sensor._id]: { ...p[sensor._id], min: e.target.value },
+                }))
+              }
+              style={{ width: 90 }}
+            />
+          </label>
+
+          <label>
+            Max{" "}
+            <input
+              type="number"
+              value={d.max}
+              onChange={(e) =>
+                setDraftSoglie((p) => ({
+                  ...p,
+                  [sensor._id]: { ...p[sensor._id], max: e.target.value },
+                }))
+              }
+              style={{ width: 90 }}
+            />
+          </label>
+
+          <button onClick={() => saveSoglie(sensor)} disabled={savingId === sensor._id}>
+            {savingId === sensor._id ? "Salvo..." : "Salva"}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ---- ⬆⬆⬆  FINE FUNZIONALITÀ MODIFICA SOGLIE  ⬆⬆⬆ ----
+
+  const rilevazioniArnia = useMemo(() => {
+    // nel tuo caso stai usando sea_id, quindi non filtriamo per sen_id
+    return (Array.isArray(rilevazioni) ? rilevazioni : []).slice(0, 30);
   }, [rilevazioni]);
 
-  function getLatestValueForType(typeNameIncludes) {
-    // typeNameIncludes: "peso" / "temperatura" / "umid"
-    const target = typeNameIncludes.toLowerCase();
-    const sens = sensoriConTipo.find((s) =>
-      String(s._tipo || "").toLowerCase().includes(target)
-    );
-    if (!sens) return null;
-    const latest = latestBySenId.get(String(sens.sen_id));
-    if (!latest) return null;
-    return latest.ril_dato;
-  }
-
-  const peso = getLatestValueForType("peso");
-  const temperatura = getLatestValueForType("temperatura");
-  const umidita = getLatestValueForType("umid");
-
-  // ---- Soglie (F5.6 / F5.7) ----
-  function incSoglia(key) {
-    setSoglie((prev) => ({ ...prev, [key]: (prev[key] ?? 0) + 1 }));
-  }
-  function decSoglia(key) {
-    setSoglie((prev) => ({ ...prev, [key]: (prev[key] ?? 0) - 1 }));
-  }
-
-  // ---- Grafici (F5.5) ----
-  // Per ora: lista delle ultime rilevazioni della singola arnia (testuale).
-  // Puoi sostituire con un grafico vero (Chart.js, Recharts, ecc.)
-  const rilevazioniArnia = useMemo(() => {
-    const sensIds = new Set(sensori.map((s) => String(s.sen_id)));
-    return rilevazioni.filter((r) => sensIds.has(String(r.ril_sen_id))).slice(0, 30);
-  }, [sensori, rilevazioni]);
-
+  // Per i valori: già fai find su rilevazioni con _tipo
   return (
     <div>
       <h1>Arnia</h1>
 
-      {/* Barra sinistra / comandi (simile screen, senza grafica) */}
       <div style={{ border: "1px solid #ccc", padding: 12, marginBottom: 12 }}>
         <button onClick={goHome}>F5.0 - Home</button>{" "}
         <button onClick={goBackToApiario} disabled={!arnia?.arn_api_id}>
@@ -272,51 +435,23 @@ export default function ArniaPage() {
       {isLoading && <p>Caricamento...</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      {/* Dati arnia */}
       <div style={{ border: "1px solid #ccc", padding: 12, marginBottom: 12 }}>
-        <div>
-          <b>arn_id:</b> {id}
-        </div>
-        <div>
-          <b>arn_api_id:</b> {arnia?.arn_api_id ?? "-"}
-        </div>
-        <div>
-          <b>arn_dataInst:</b> {arnia?.arn_dataInst ?? "-"}
-        </div>
-        <div>
-          <b>arn_piena:</b> {String(arnia?.arn_piena)}
-        </div>
-        <div>
-          <b>arn_MacAddress:</b> {arnia?.arn_MacAddress ?? "-"}
-        </div>
+        <div><b>arn_id:</b> {id}</div>
+        <div><b>arn_api_id:</b> {arnia?.arn_api_id ?? "-"}</div>
+        <div><b>arn_dataInst:</b> {arnia?.arn_dataInst ?? "-"}</div>
+        <div><b>arn_piena:</b> {String(arnia?.arn_piena)}</div>
+        <div><b>arn_MacAddress:</b> {arnia?.arn_MacAddress ?? "-"}</div>
       </div>
 
-      {/* F5.4 - Valori (Peso / Temperatura / Umidità) */}
       <div style={{ border: "1px solid #ccc", padding: 12, marginBottom: 12 }}>
         <h2>F5.4 - Valori</h2>
         <ul>
-          <li>
-            <b>Peso:</b> {peso ?? "—"}
-          </li>
-          <li>
-            <b>Temperatura:</b> {temperatura ?? "—"}
-          </li>
-          <li>
-            <b>Umidità:</b> {umidita ?? "—"}
-          </li>
+          <li><b>Peso:</b> {rilevazioni.find(r => r._tipo?.toLowerCase().includes("peso"))?.ril_dato ?? "—"}</li>
+          <li><b>Temperatura:</b> {rilevazioni.find(r => r._tipo?.toLowerCase().includes("temperatura"))?.ril_dato ?? "—"}</li>
+          <li><b>Umidità:</b> {rilevazioni.find(r => r._tipo?.toLowerCase().includes("umid"))?.ril_dato ?? "—"}</li>
         </ul>
-
-        <details>
-          <summary>Debug sensori</summary>
-          <pre style={{ whiteSpace: "pre-wrap" }}>
-            Sensori: {sensoriConTipo.length}
-            {"\n"}Esempio sensore:{" "}
-            {sensoriConTipo[0] ? JSON.stringify(sensoriConTipo[0], null, 2) : "nessuno"}
-          </pre>
-        </details>
       </div>
 
-      {/* F5.3 - Notifiche con scrollbar */}
       <div style={{ border: "1px solid #ccc", padding: 12, marginBottom: 12 }}>
         <h2>Notifiche (F5.3)</h2>
         <div style={{ maxHeight: 180, overflowY: "auto", border: "1px solid #eee", padding: 8 }}>
@@ -326,13 +461,9 @@ export default function ArniaPage() {
             <ul>
               {notifiche.map((n) => (
                 <li key={n._id} style={{ marginBottom: 10 }}>
-                  <div>
-                    <b>{n.not_titolo || n.title || "Notifica"}</b>
-                  </div>
+                  <div><b>{n.not_titolo || n.title || "Notifica"}</b></div>
                   <div>{n.not_desc || n.message || ""}</div>
-                  <small>
-                    {n._created ? new Date(n._created).toLocaleString() : ""}
-                  </small>
+                  <small>{n._created ? new Date(n._created).toLocaleString() : ""}</small>
                 </li>
               ))}
             </ul>
@@ -340,7 +471,6 @@ export default function ArniaPage() {
         </div>
       </div>
 
-      {/* F5.5 - Grafici (placeholder testuale) */}
       <div style={{ border: "1px solid #ccc", padding: 12, marginBottom: 12 }}>
         <h2>F5.5 - Grafici (placeholder)</h2>
         {!rilevazioniArnia.length ? (
@@ -349,34 +479,20 @@ export default function ArniaPage() {
           <ul>
             {rilevazioniArnia.map((r) => (
               <li key={r._id}>
-                sen_id={r.ril_sen_id} | dato={r.ril_dato} | data={r.ril_dataOra}
+                sea_id={r.ril_sea_id} | tipo={r._tipo || "?"} | dato={r.ril_dato} | data={r.ril_dataOra}
               </li>
             ))}
           </ul>
         )}
       </div>
 
-      {/* F5.6 / F5.7 - Soglie */}
+      {/* ✅ QUI: sostituzione del blocco soglie con min/max editabili */}
       <div style={{ border: "1px solid #ccc", padding: 12 }}>
-        <h2>Soglie (F5.6 / F5.7)</h2>
+        <h2>Soglie (min / max) — salvate in sensoriarnia</h2>
 
-        <div style={{ marginBottom: 10 }}>
-          <b>Peso:</b> {soglie.peso}{" "}
-          <button onClick={() => incSoglia("peso")}>+</button>{" "}
-          <button onClick={() => decSoglia("peso")}>-</button>
-        </div>
-
-        <div style={{ marginBottom: 10 }}>
-          <b>Temperatura:</b> {soglie.temperatura}{" "}
-          <button onClick={() => incSoglia("temperatura")}>+</button>{" "}
-          <button onClick={() => decSoglia("temperatura")}>-</button>
-        </div>
-
-        <div>
-          <b>Umidità:</b> {soglie.umidita}{" "}
-          <button onClick={() => incSoglia("umidita")}>+</button>{" "}
-          <button onClick={() => decSoglia("umidita")}>-</button>
-        </div>
+        {renderSogliaRow("Peso", findSensoreByTipoIncludes("peso"))}
+        {renderSogliaRow("Temperatura", findSensoreByTipoIncludes("temperatura"))}
+        {renderSogliaRow("Umidità", findSensoreByTipoIncludes("umid"))}
       </div>
     </div>
   );
