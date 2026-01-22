@@ -1,4 +1,4 @@
-# 📄 Specifica Tecnica Interfacce - Gestionale Apiario
+# Specifica Tecnica Interfacce - Gestionale Apiario
 
 **Versione:** 1.0
 **Ambito:** Web Application / Frontend
@@ -134,6 +134,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 **Elementi Chiave:**
 * **Stato Complessivo:** Un indicatore semaforico globale.
     > *Logica:* Se anche solo un'arnia presenta parametri critici (es. Peso < soglia o Umidità > 90%), lo stato cambia.
+* **Mappa Apiari:** Mappa che illustra la posizione di ogni apiario.
 * **Lista Apiari:** Card riassuntive per ogni postazione.
 * **Log Notifiche:** Visualizzazione degli eventi generati dalla logica di backend (es. *"Batteria scarica"*, *"Inizio sciamatura rilevato"*).
 
@@ -300,7 +301,7 @@ export default function ApiarioPage() {
         setApiario(Array.isArray(apiarioArr) ? apiarioArr[0] : null);
 
         // 2) ARNIE filtrate per arn_api_id
-        // ✅ query robusta: prova sia NUMERO che STRINGA
+        // query robusta: prova sia NUMERO che STRINGA
         const qArnieObj = {
           $or: [{ arn_api_id: Number(id) }, { arn_api_id: String(id) }],
         };
@@ -397,7 +398,7 @@ L'interfaccia traduce i dati numerici in stati comprensibili:
 
 ```const RESTDB_BASE = "https://databaseclone-6d99.restdb.io/rest";
 
-// ⚠️ Metti i nomi ESATTI delle collezioni su RestDB
+// Metti i nomi ESATTI delle collezioni su RestDB
 const COL_ARNIA = "arnie";
 const COL_SENSORE = "sensori";
 const COL_TIPO = "tipi";
@@ -652,7 +653,7 @@ Interfaccia di controllo per l'ESP32-CAM.
 
 #### 3. Configurazione Soglie (Attuatori Logici)
 Permette la modifica dei parametri di allarme senza riprogrammare il firmware.
-* Controlli `+ / -` per le soglie di **Peso Minimo** e **Temperatura Massima**.
+* Controlli `+ / -` per le soglie di **Peso*, **Temperatura** e **Umidità**.
 
 ---
 
