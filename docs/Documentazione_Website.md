@@ -132,7 +132,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 
 **Elementi Chiave:**
 * **Stato Complessivo:** Un indicatore semaforico globale.
-    > *Logica:* Se anche solo un'arnia presenta parametri critici (es. Peso < soglia o Umidità > 90%), lo stato diventa **"Attenzione"**.
+    > *Logica:* Se anche solo un'arnia presenta parametri critici (es. Peso < soglia o Umidità > 90%), lo stato cambia.
 * **Lista Apiari:** Card riassuntive per ogni postazione.
 * **Log Notifiche:** Visualizzazione degli eventi generati dalla logica di backend (es. *"Batteria scarica"*, *"Inizio sciamatura rilevato"*).
 
@@ -234,7 +234,7 @@ export default function Home() {
 * **Scopo:** Permette di confrontare le arnie vicine tra loro (fondamentale per capire se un'anomalia è singola o ambientale).
 
 **Elementi Chiave:**
-* **Griglia Arnie:** Ogni arnia è un blocco che mostra i parametri vitali (es. Peso, Temp, Stato).
+* **Griglia Arnie:** Ogni arnia è un blocco che mostra i parametri vitali (Peso, Temp, Stato).
 * **Evidenziazione Anomalie:** Le arnie che richiedono intervento (es. sensore disconnesso o valori fuori soglia) sono evidenziate visivamente (bordo rosso/arancione).
 
 ```const RESTDB_BASE = "https://databaseclone-6d99.restdb.io/rest";
@@ -393,8 +393,6 @@ L'interfaccia traduce i dati numerici in stati comprensibili:
 | **Temperatura** (DS18B20) | Valore in °C | • **34-36°C:** Icona Verde (Covata OK)<br>• **< 10°C:** Allarme "Rischio Collasso/Fame"<br>• **> 37°C:** Allarme "Possibile Sciamatura"<br>• **= Temp Esterna:** Allarme Critico "Perdita Colonia" |
 | **Umidità** (SHT21/HTU21) | Percentuale % | • **55-70%:** Stato "Ottimale"<br>• **< 60%:** Notifica "Maturazione Miele"<br>• **> 90%:** Allarme "Rischio Condensa/Malattie" |
 | **Peso** (HX711) | Totale in Kg | • **Grafico Trend:** Variazione produzione vs consumo.<br>• **Logica:** Evidenzia cali improvvisi (furto/sciamatura) o lenti (fame invernale). |
-| **Analisi Acustica** (KY-038) | Frequenza (Hz) | • **100-180 Hz:** Riposo<br>• **250-350 Hz:** Ventilazione<br>• **350-550 Hz:** **ALLARME SCIAMATURA**<br>• **600+ Hz:** Agitazione/Orfana |
-| **Livello Acqua** (HW-038) | Pieno/Vuoto | • **Notifica:** "Acqua Terminata" se non rileva conducibilità. |
 
 ```const RESTDB_BASE = "https://databaseclone-6d99.restdb.io/rest";
 
