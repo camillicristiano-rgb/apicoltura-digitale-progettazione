@@ -17,6 +17,7 @@ L'applicazione è una **Single Page Application (SPA)** reattiva. L'architettura
 * **Ruolo dell'Interfaccia:** Presentazione dati e Configurazione.
 * **Sicurezza:** L'accesso è protetto e subordinato al possesso di una API Key valida.
 * **Reattività:** Il sistema fornisce feedback immediato sullo stato di salute della colonia (es. *Normalità, Allarme, Manutenzione*).
+* **RestDB:** https://databaseclone-6d99.restdb.io/rest
 
 ---
 
