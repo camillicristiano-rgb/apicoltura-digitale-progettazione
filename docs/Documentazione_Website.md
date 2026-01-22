@@ -731,3 +731,13 @@ La struttura visiva fa riferimento alla documentazione di design allegata:
 # [Funzionigramma](../docs/UI/Funzionigramma.pdf)
 # [Mockup](../docs/UI/mockup.pdf)
 # [ProgettazioneMockup](../docs/UI/ProgettazioneMockup_SitoApicoltore.pdf)
+
+## 7. Tecnologie Utilizzate
+
+Di seguito i riferimenti alle principali tecnologie e librerie impiegate nello sviluppo del frontend:
+
+[React](https://react.dev/): Libreria JavaScript per la costruzione delle interfacce utente.
+[TailwindCSS](https://tailwindcss.com/): Framework CSS utility-first per uno sviluppo rapido.
+[Node.js](https://nodejs.org/): Runtime JavaScript utilizzato per l'ambiente di sviluppo e gestione pacchetti.
+[ShadCN/ui](https://ui.shadcn.com/): Collezione di componenti UI accessibili e personalizzabili.
+[Lucide React](https://lucide.dev/): Libreria di icone leggera e consistente.
