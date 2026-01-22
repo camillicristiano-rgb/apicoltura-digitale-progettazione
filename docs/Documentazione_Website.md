@@ -80,6 +80,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 
 * **F 1.1 (Azione):** Button "Accedi" per effettuare il login.
 
+#### Logica Codice:
+Il componente gestisce lo stato dell'input e, al click, verifica la chiave chiamando _ping su RestDB.
+
 ```export default function Login() {
   const [apik, setApik] = useState("");
   const [error, setError] = useState("");
@@ -157,6 +160,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
 * **3.4 (Lista):** Elementi (bottoni) per scorrere/visualizzare tutti gli apiari posseduti.
 
 * **3.5 (Logout):** Button che riporta alla schermata di login, cancellando la sessione.
+
+#### Logica Codice:
+Caricamento parallelo di Apiari e Notifiche per massimizzare la velocità.
 
 ```const RESTDB_BASE = "https://databaseclone-6d99.restdb.io/rest";
 
@@ -272,6 +278,9 @@ export default function Home() {
 * **F 4.4 (Lista Arnie):** Griglia o lista scorrevole di tutte le arnie dell'apiario.
 
 * **F 4.5 (Logout):** Button per tornare al login.
+
+#### Logica Codice:
+Utilizza una query NoSQL robusta ($or) per trovare le arnie associate all'ID dell'apiario, gestendo sia formati numerici che stringa.
 
 ```const RESTDB_BASE = "https://databaseclone-6d99.restdb.io/rest";
 
@@ -445,6 +454,9 @@ L'interfaccia traduce i dati numerici in stati comprensibili:
 | **Temperatura** (DS18B20) | Valore in °C | • **34-36°C:** Icona Verde (Covata OK)<br>• **< 10°C:** Allarme "Rischio Collasso/Fame"<br>• **> 37°C:** Allarme "Possibile Sciamatura"<br>• **= Temp Esterna:** Allarme Critico "Perdita Colonia" |
 | **Umidità** (SHT21/HTU21) | Percentuale % | • **55-70%:** Stato "Ottimale"<br>• **< 60%:** Notifica "Maturazione Miele"<br>• **> 90%:** Allarme "Rischio Condensa/Malattie" |
 | **Peso** (HX711) | Totale in Kg | • **Grafico Trend:** Variazione produzione vs consumo.<br>• **Logica:** Evidenzia cali improvvisi (furto/sciamatura) o lenti (fame invernale). |
+
+#### Logica di Visualizzazione Dati:
+Il codice mappa dinamicamente i sensori installati ai widget dell'interfaccia.
 
 ```const RESTDB_BASE = "https://databaseclone-6d99.restdb.io/rest";
 
