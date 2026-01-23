@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
-const RESTDB_BASE = "https://clone7-b263.restdb.io/rest";
+const RESTDB_BASE = import.meta.env.VITE_RESTDB_BASE;
 
 // METTI QUI I NOMI ESATTI delle collezioni come appaiono su RestDB
 const COL_APIARIO = "apiari";
