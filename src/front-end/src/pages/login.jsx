@@ -24,7 +24,7 @@ export default function Login() {
 
     try {
       // 3. Controllo connessione reale verso RestDB
-      const response = await fetch("https://clone4-9a15.restdb.io/rest/_ping", {
+      const response = await fetch("https://clone7-b263.restdb.io/rest/_ping", {
         method: "GET",
         headers: {
           "x-apikey": apik,

@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
+import { MapContainer } from "react-leaflet/MapContainer";
+import { TileLayer } from "react-leaflet/TileLayer";
 import { Marker, Popup } from "react-leaflet";
-import { MapContainer } from 'react-leaflet/MapContainer'
-import { TileLayer } from 'react-leaflet/TileLayer'
+import L from "leaflet";
 
-const RESTDB_BASE = "https://clone4-9a15.restdb.io/rest";
-
-// ⚠️ Cambia questi nomi se le tue collezioni si chiamano diversamente:
+const RESTDB_BASE = "https://clone7-b263.restdb.io/rest";
 const COL_APIARI = "apiari";
 const COL_NOTIFICHE = "notifiche";
 
@@ -80,46 +79,77 @@ export default function Home() {
     loadAll();
   }, [apik]);
 
-  // F3.0: torna alla home
   function goHome() {
     window.location.href = "/home";
   }
 
-
-  // F3.5: logout
   function logout() {
     localStorage.removeItem("apik");
     window.location.href = "/";
   }
 
-  // Porta alla pagina di uno specifico apiario
   function goToApiario(apiarioId) {
     window.location.href = `/apiario/${apiarioId}`;
   }
 
-  // --- GRAFICA (replica stile screenshot) ---
+  // ✅ ICONA LEAFLET PERSONALIZZATA (immagine in /public/apiario.png)
+  const apiarioLeafletIcon = useMemo(() => {
+    return L.icon({
+      iconUrl: "/apiario.png",
+      iconSize: [34, 34],
+      iconAnchor: [17, 34],
+      popupAnchor: [0, -34],
+      className: "apiario-marker",
+    });
+  }, []);
+
+  // ✅ Helpers notifiche: titolo / descrizione / data (NO JSON)
+  const getNotifTitle = (n) =>
+    String(n?.not_titolo ?? n?.titolo ?? n?.title ?? "Notifica");
+
+  const getNotifDesc = (n) =>
+    String(
+      n?.not_desc ??
+        n?.not_dex ?? // (se nel DB hai not_dex)
+        n?.not_testo ??
+        n?.not_message ??
+        n?.messaggio ??
+        n?.message ??
+        n?.desc ??
+        ""
+    );
+
+  const getNotifDate = (n) => {
+    const raw = n?.not_dataOra ?? n?.not_data ?? n?._created ?? n?.created ?? null;
+    if (!raw) return "";
+    const d = new Date(raw);
+    return Number.isNaN(d.getTime()) ? String(raw) : d.toLocaleString();
+  };
+
+  // ---------- STYLES ----------
   const styles = useMemo(
     () => ({
       page: {
         minHeight: "100vh",
-        background: "#f5d88b", // giallo sabbia
+        background: "#f5d88b",
         display: "flex",
+        padding: 10,
+        gap: 14,
         fontFamily:
           'system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"',
       },
-
       sidebar: {
         width: 86,
         background: "#f1d083",
-        borderRight: "2px solid rgba(0,0,0,0.08)",
-        boxShadow: "inset -1px 0 0 rgba(255,255,255,0.35)",
+        borderRadius: 14,
         padding: "10px 8px",
         display: "flex",
         flexDirection: "column",
         gap: 10,
         alignItems: "center",
+        border: "2px solid rgba(0,0,0,0.08)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.35)",
       },
-
       navItem: {
         width: 64,
         borderRadius: 10,
@@ -131,12 +161,10 @@ export default function Home() {
         cursor: "pointer",
         userSelect: "none",
       },
-
       navItemActive: {
         background: "rgba(255,255,255,0.32)",
         boxShadow: "0 1px 0 rgba(0,0,0,0.05)",
       },
-
       iconBox: {
         width: 42,
         height: 42,
@@ -147,13 +175,11 @@ export default function Home() {
         boxShadow: "inset 0 1px 0 rgba(255,255,255,0.45)",
         border: "1px solid rgba(0,0,0,0.06)",
       },
-
       navLabel: {
         fontSize: 12,
         color: "rgba(0,0,0,0.65)",
         lineHeight: 1,
       },
-
       apiarioBtn: {
         width: 64,
         borderRadius: 10,
@@ -166,7 +192,6 @@ export default function Home() {
         background: "transparent",
         border: "none",
       },
-
       apiarioIcon: {
         width: 42,
         height: 42,
@@ -176,13 +201,10 @@ export default function Home() {
         placeItems: "center",
         border: "1px solid rgba(0,0,0,0.06)",
       },
-
       content: {
         flex: 1,
         padding: 14,
       },
-
-      // contenitore centrale come screenshot: mappa sopra e notifiche sotto
       card: {
         height: "calc(100vh - 28px)",
         background: "#f2d48a",
@@ -195,61 +217,41 @@ export default function Home() {
         gap: 14,
         overflow: "hidden",
       },
-
       mapBox: {
         height: "60%",
-        background: "#b9d3bf", // verde-grigio
+        background: "#b9d3bf",
         borderRadius: 12,
         border: "2px solid rgba(0,0,0,0.06)",
         position: "relative",
         overflow: "hidden",
       },
-
       notifHeader: {
         display: "flex",
         alignItems: "center",
         gap: 8,
         padding: "0 2px",
       },
-
       notifTitle: {
         fontSize: 28,
         fontWeight: 800,
         color: "rgba(0,0,0,0.65)",
         letterSpacing: 0.2,
       },
-
-      bell: {
-        width: 22,
-        height: 22,
-        display: "inline-block",
-      },
-
+      bell: { width: 22, height: 22, display: "inline-block" },
       notifBox: {
         flex: 1,
-        background: "#d7b974", // beige più scuro
+        background: "#d7b974",
         borderRadius: 12,
         border: "2px solid rgba(0,0,0,0.06)",
         overflow: "hidden",
         position: "relative",
       },
-
       ruled: {
         position: "absolute",
         inset: 0,
         backgroundImage:
           "repeating-linear-gradient(to bottom, rgba(255,255,255,0.24), rgba(255,255,255,0.24) 2px, transparent 2px, transparent 32px)",
         pointerEvents: "none",
-      },
-
-      notifItem: {
-        padding: "6px 8px 10px 8px",
-        paddingTop: 4,
-        borderRadius: 10,
-        background: "rgba(255,255,255,0.18)",
-        border: "1px solid rgba(0,0,0,0.05)",
-        marginBottom: 22,      // distanza tra una riga e l’altra
-        lineHeight: "28px",    // testo allineato sopra la riga
       },
       notifItem: {
         padding: "10px 8px",
@@ -258,26 +260,20 @@ export default function Home() {
         border: "1px solid rgba(0,0,0,0.05)",
         marginBottom: 10,
       },
-
       notifItemTitle: {
         fontWeight: 800,
         color: "rgba(0,0,0,0.72)",
         marginBottom: 4,
       },
-
       notifItemBody: {
         color: "rgba(0,0,0,0.66)",
         fontSize: 14,
-        position: "relative",
-        top: -6,               // 👈 questo lo porta SOPRA la riga
       },
-
       metaRow: {
         marginTop: 6,
         fontSize: 12,
         color: "rgba(0,0,0,0.5)",
       },
-
       statusRow: {
         display: "flex",
         gap: 10,
@@ -286,39 +282,11 @@ export default function Home() {
         fontSize: 13,
         color: "rgba(0,0,0,0.65)",
       },
-
-      // marker (pin) stile screenshot
-      pin: {
-        position: "absolute",
-        transform: "translate(-50%, -100%)",
-        cursor: "pointer",
-        filter: "drop-shadow(0 2px 1px rgba(0,0,0,0.15))",
-      },
     }),
     []
   );
 
-  // posizioni pins (distribuite) – clic porta all’apiario
-  const pins = useMemo(() => {
-    const list = Array.isArray(apiari) ? apiari : [];
-    const n = Math.min(list.length, 8);
-    if (!n) return [];
-
-    // distribuzione “a mano” simile screenshot
-    const positions = [
-      { left: 18, top: 52 },
-      { left: 38, top: 44 },
-      { left: 55, top: 64 },
-      { left: 82, top: 46 },
-      { left: 70, top: 34 },
-      { left: 30, top: 70 },
-      { left: 48, top: 30 },
-      { left: 90, top: 70 },
-    ].slice(0, n);
-
-    return list.slice(0, n).map((a, i) => ({ apiario: a, ...positions[i] }));
-  }, [apiari]);
-
+  // ---------- ICONS ----------
   const BellIcon = () => (
     <svg
       style={styles.bell}
@@ -332,23 +300,6 @@ export default function Home() {
     >
       <path d="M18 8a6 6 0 10-12 0c0 7-3 7-3 7h18s-3 0-3-7" />
       <path d="M13.73 21a2 2 0 01-3.46 0" />
-    </svg>
-  );
-
-  const PinIcon = ({ size = 26 }) => (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden="true"
-    >
-      <path
-        d="M12 22s7-4.4 7-12a7 7 0 10-14 0c0 7.6 7 12 7 12z"
-        fill="#d63b2f"
-      />
-      <circle cx="12" cy="10" r="3" fill="#fff" />
-      <circle cx="12" cy="10" r="1.3" fill="#d63b2f" />
     </svg>
   );
 
@@ -375,12 +326,7 @@ export default function Home() {
   const DownloadIcon = () => (
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <circle cx="12" cy="12" r="9" stroke="rgba(0,0,0,0.55)" strokeWidth="2" />
-      <path
-        d="M12 7v7"
-        stroke="rgba(0,0,0,0.55)"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
+      <path d="M12 7v7" stroke="rgba(0,0,0,0.55)" strokeWidth="2" strokeLinecap="round" />
       <path
         d="M8.8 12.8L12 15.9l3.2-3.1"
         stroke="rgba(0,0,0,0.55)"
@@ -394,12 +340,7 @@ export default function Home() {
   const LogoutIcon = () => (
     <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <rect x="4" y="4" width="9" height="16" rx="2" fill="#88c1c8" />
-      <path
-        d="M14 12h7"
-        stroke="#d15b5b"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
+      <path d="M14 12h7" stroke="#d15b5b" strokeWidth="2" strokeLinecap="round" />
       <path
         d="M18 9l3 3-3 3"
         stroke="#d15b5b"
@@ -410,11 +351,23 @@ export default function Home() {
     </svg>
   );
 
+  // ---------- COORDS ----------
+  const apiariWithCoords = useMemo(() => {
+    const list = Array.isArray(apiari) ? apiari : [];
+    return list
+      .map((a) => ({ a, pos: [Number(a.api_lat), Number(a.api_lon)] }))
+      .filter((x) => Number.isFinite(x.pos[0]) && Number.isFinite(x.pos[1]));
+  }, [apiari]);
+
+  const mapCenter = useMemo(() => {
+    if (apiariWithCoords.length) return apiariWithCoords[0].pos;
+    return [43.385117, 12.203588];
+  }, [apiariWithCoords]);
+
   return (
     <div style={styles.page}>
-      {/* SIDEBAR (come screenshot) */}
+      {/* SIDEBAR */}
       <aside style={styles.sidebar}>
-        {/* Home */}
         <div
           style={{ ...styles.navItem, ...styles.navItemActive }}
           onClick={goHome}
@@ -428,7 +381,6 @@ export default function Home() {
           <div style={styles.navLabel}>Home</div>
         </div>
 
-        {/* Pulsanti Apiari (verticali) */}
         {apiari?.slice(0, 3).map((a, idx) => (
           <button
             key={a._id}
@@ -443,7 +395,6 @@ export default function Home() {
           </button>
         ))}
 
-        {/* “Download” icona (solo grafica, come nello screenshot) */}
         <div style={{ flex: 1 }} />
 
         <div style={styles.navItem} title="Download">
@@ -452,7 +403,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Logout */}
         <div
           style={styles.navItem}
           onClick={logout}
@@ -470,28 +420,49 @@ export default function Home() {
       {/* CONTENUTO */}
       <main style={styles.content}>
         <div style={styles.card}>
-          {/* Status (mantiene loading/error senza “rovinare” la grafica) */}
           <div style={styles.statusRow}>
             {isLoading ? <span>Caricamento...</span> : <span>&nbsp;</span>}
             {error ? <span style={{ color: "#b00020" }}>{error}</span> : null}
+            {!isLoading && !error ? (
+              <span>
+                Apiari con coordinate: <b>{apiariWithCoords.length}</b> / {apiari.length}
+              </span>
+            ) : null}
           </div>
 
-          {/* F3.1 - MAPPA grafica */}
+          {/* MAPPA */}
           <div style={styles.mapBox} aria-label="Mappa">
-            <MapContainer center={[43.385117, 12.203588]} zoom={12} maxZoom={18} style={{ height: '100%', width: '100%' }}>
+            <MapContainer
+              center={mapCenter}
+              zoom={12}
+              maxZoom={18}
+              style={{ height: "100%", width: "100%" }}
+            >
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
               />
-              <Marker position={[43.385117, 12.203588]}>
-                <Popup>
-                  A pretty CSS3 popup. <br /> Easily customizable.
-                </Popup>
-              </Marker>
+
+              {apiariWithCoords.map(({ a, pos }) => (
+                <Marker
+                  key={a._id}
+                  position={pos}
+                  icon={apiarioLeafletIcon}
+                  eventHandlers={{ click: () => goToApiario(a.api_id) }}
+                >
+                  <Popup>
+                    <b>{a.api_nome ?? "Apiario"}</b>
+                    <br />
+                    ID: {a.api_id}
+                    <br />
+                    Lat/Lng: {pos[0]}, {pos[1]}
+                  </Popup>
+                </Marker>
+              ))}
             </MapContainer>
           </div>
 
-          {/* F3.2 - NOTIFICHE */}
+          {/* NOTIFICHE */}
           <div style={styles.notifHeader}>
             <div style={styles.notifTitle}>Notifiche</div>
             <BellIcon />
@@ -499,31 +470,24 @@ export default function Home() {
 
           <section style={styles.notifBox}>
             <div style={styles.ruled} />
-            <div style={styles.notifList}>
+            <div style={{ padding: 10 }}>
               {!notifiche.length ? (
-                <div style={{ padding: 10, color: "rgba(0,0,0,0.6)" }}>
-                  Nessuna notifica.
-                </div>
+                <div style={{ color: "rgba(0,0,0,0.6)" }}>Nessuna notifica.</div>
               ) : (
-                notifiche.map((n) => (
+                notifiche.slice(0, 50).map((n) => (
                   <div key={n._id} style={styles.notifItem}>
-                    <div style={styles.notifItemTitle}>
-                      {n.titolo || n.title || "Notifica"}
+                    <div style={styles.notifItemTitle}>{getNotifTitle(n)}</div>
+
+                    <div style={styles.notifItemBody}>{getNotifDesc(n) || "—"}</div>
+
+                    <div style={styles.metaRow}>
+                      {getNotifDate(n) ? <>Data: {getNotifDate(n)}</> : "Data: —"}
                     </div>
-                    <div style={styles.notifItemBody}>
-                      {n.messaggio || n.message || JSON.stringify(n)}
-                    </div>
-                    {n._created ? (
-                      <div style={styles.metaRow}>
-                        Creato: {new Date(n._created).toLocaleString()}
-                      </div>
-                    ) : null}
                   </div>
                 ))
               )}
             </div>
           </section>
-
         </div>
       </main>
     </div>

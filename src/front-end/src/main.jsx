@@ -3,11 +3,11 @@ import ReactDOM from "react-dom/client";
 import { createBrowserRouter, Navigate } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import "leaflet/dist/leaflet.css";
-
 import Login from "./pages/login.jsx";
 import Home from "./pages/home.jsx";
 import ApiarioPage from "./pages/apiario.jsx";
 import ArniaPage from "./pages/arnia.jsx";
+import './index.css';
 
 const router = createBrowserRouter([
   {

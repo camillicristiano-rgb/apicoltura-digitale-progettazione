@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 
-const RESTDB_BASE = "https://clone4-9a15.restdb.io/rest";
+const RESTDB_BASE = "https://clone7-b263.restdb.io/rest";
 
 // METTI QUI I NOMI ESATTI delle collezioni come appaiono su RestDB
 const COL_APIARIO = "apiari";
@@ -32,24 +32,10 @@ function extractLatLon(apiario) {
   // 1) campi "piatti" più comuni
   const latCandidates = [
     apiario.api_lat,
-    apiario.lat,
-    apiario.latitude,
-    apiario.apiario_lat,
-    apiario.gps_lat,
-    apiario.pos_lat,
   ];
 
   const lonCandidates = [
     apiario.api_lon,
-    apiario.api_lng,
-    apiario.lng,
-    apiario.lon,
-    apiario.longitude,
-    apiario.apiario_lon,
-    apiario.gps_lon,
-    apiario.gps_lng,
-    apiario.pos_lon,
-    apiario.pos_lng,
   ];
 
   let lat = latCandidates.map(parseCoord).find((x) => x !== null) ?? null;
