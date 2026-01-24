@@ -1,4 +1,5 @@
 import { useState } from "react";
+const RESTDB_BASE = import.meta.env.VITE_RESTDB_BASE;
 
 export default function Login() {
   const [apik, setApik] = useState("");
@@ -24,7 +25,7 @@ export default function Login() {
 
     try {
       // 3. Controllo connessione reale verso RestDB
-      const response = await fetch("https://clone7-b263.restdb.io/rest/_ping", {
+      const response = await fetch(RESTDB_BASE, {
         method: "GET",
         headers: {
           "x-apikey": apik,
