@@ -1,5 +1,6 @@
 import { useState } from "react";
-const RESTDB_BASE = import.meta.env.VITE_RESTDB_BASE;
+//const RESTDB_BASE = import.meta.env.VITE_RESTDB_BASE;
+const RESTDB_BASE = "https://databaseprova-82e0.restdb.io";
 
 export default function Login() {
   const [apik, setApik] = useState("");

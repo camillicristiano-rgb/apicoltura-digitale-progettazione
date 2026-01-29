@@ -4,7 +4,8 @@ import { TileLayer } from "react-leaflet/TileLayer";
 import { Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 
-const RESTDB_BASE = import.meta.env.VITE_RESTDB_BASE;
+//const RESTDB_BASE = import.meta.env.VITE_RESTDB_BASE;
+const RESTDB_BASE = "https://databaseprova-82e0.restdb.io";
 const COL_APIARI = "apiari";
 const COL_NOTIFICHE = "notifiche";
 

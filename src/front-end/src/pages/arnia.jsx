@@ -3,7 +3,8 @@ import { useParams } from "react-router-dom";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 
-const RESTDB_BASE = import.meta.env.VITE_RESTDB_BASE;
+//const RESTDB_BASE = import.meta.env.VITE_RESTDB_BASE;
+const RESTDB_BASE = "https://databaseprova-82e0.restdb.io";
 
 // ⚠️ Metti i nomi ESATTI delle collezioni su RestDB
 const COL_ARNIA = "arnie";
