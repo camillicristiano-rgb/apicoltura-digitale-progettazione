@@ -1,6 +1,6 @@
 import { useState } from "react";
-//const RESTDB_BASE = import.meta.env.VITE_RESTDB_BASE;
-const RESTDB_BASE = "https://clone7-b263.restdb.io";
+const RESTDB_BASE = import.meta.env.VITE_RESTDB_BASE;
+//const RESTDB_BASE = "https://clone7-b263.restdb.io";
 
 export default function Login() {
   const [apik, setApik] = useState("");
@@ -29,7 +29,7 @@ export default function Login() {
       const response = await fetch(RESTDB_BASE, {
         method: "GET",
         headers: {
-          "x-apikey": apik,
+          "x-apikey": "697c5d4953d66e48e51956eb",
           "Content-Type": "application/json",
           "cache-control": "no-cache",
         },
