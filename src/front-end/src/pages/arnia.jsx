@@ -4,7 +4,7 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YA
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 
 //const RESTDB_BASE = import.meta.env.VITE_RESTDB_BASE;
-const RESTDB_BASE = "https://databaseprova-82e0.restdb.io";
+const RESTDB_BASE = "https://clone7-b263.restdb.io";
 
 // ⚠️ Metti i nomi ESATTI delle collezioni su RestDB
 const COL_ARNIA = "arnie";

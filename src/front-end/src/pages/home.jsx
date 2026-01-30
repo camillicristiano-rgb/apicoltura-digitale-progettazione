@@ -5,7 +5,7 @@ import { Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 
 //const RESTDB_BASE = import.meta.env.VITE_RESTDB_BASE;
-const RESTDB_BASE = "https://databaseprova-82e0.restdb.io";
+const RESTDB_BASE = "https://clone7-b263.restdb.io";
 const COL_APIARI = "apiari";
 const COL_NOTIFICHE = "notifiche";
 
