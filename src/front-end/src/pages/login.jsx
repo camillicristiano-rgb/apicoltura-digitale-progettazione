@@ -1,5 +1,5 @@
 import { useState } from "react";
-const RESTDB_BASE = import.meta.env.VITE_RESTDB_BASE+"/rest";
+const RESTDB_BASE = import.meta.env.VITE_RESTDB_BASE;
 //const RESTDB_BASE = "https://clone7-b263.restdb.io/rest";
 
 export default function Login() {
