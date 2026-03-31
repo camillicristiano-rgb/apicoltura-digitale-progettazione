@@ -26,7 +26,7 @@ export default function Login() {
 
     try {
       // 3. Controllo connessione reale verso RestDB
-      const response = await fetch(RESTDB_BASE+"/rest/rilevazioni", {
+      const response = await fetch(RESTDB_BASE+"/_ping", {
         method: "GET",
         headers: {
           "x-apikey": "697c5d4953d66e48e51956eb",
